@@ -25,15 +25,17 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import se.sll.codeserveradapter.paymentresponsible.model.AbstractTermItem;
-import se.sll.codeserveradapter.paymentresponsible.model.CodeServiceEntry;
+import se.sll.codeserveradapter.parser.AbstractTermItem;
+import se.sll.codeserveradapter.parser.CodeServiceEntry;
+import se.sll.codeserveradapter.parser.CodeServiceXMLParser;
+import se.sll.codeserveradapter.parser.SimpleXMLElementParser;
 import se.sll.codeserveradapter.paymentresponsible.model.CommissionBean;
 import se.sll.codeserveradapter.paymentresponsible.model.CommissionTypeBean;
 import se.sll.codeserveradapter.paymentresponsible.model.FacilityBean;
 import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingBean;
 
-import static se.sll.codeserveradapter.paymentresponsible.util.CodeServiceXMLParser.CodeServiceEntryCallback;
-import static se.sll.codeserveradapter.paymentresponsible.util.SimpleXMLElementParser.ElementMatcherCallback;
+import static se.sll.codeserveradapter.parser.CodeServiceXMLParser.CodeServiceEntryCallback;
+import static se.sll.codeserveradapter.parser.SimpleXMLElementParser.ElementMatcherCallback;
 
 /**
  * Builds HSA Mapping index.

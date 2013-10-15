@@ -17,6 +17,8 @@ package se.sll.codeserveradapter.paymentresponsible.model;
 
 import java.io.Serializable;
 
+import se.sll.codeserveradapter.parser.AbstractTermItem;
+
 
 public class CommissionTypeBean extends AbstractTermItem implements Serializable {
     private static final long serialVersionUID = 1L;

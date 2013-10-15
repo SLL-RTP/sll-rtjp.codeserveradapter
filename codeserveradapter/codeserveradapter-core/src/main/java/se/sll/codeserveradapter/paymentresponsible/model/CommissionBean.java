@@ -17,6 +17,8 @@ package se.sll.codeserveradapter.paymentresponsible.model;
 
 import java.io.Serializable;
 
+import se.sll.codeserveradapter.parser.AbstractTermItem;
+
 
 /**
  * 

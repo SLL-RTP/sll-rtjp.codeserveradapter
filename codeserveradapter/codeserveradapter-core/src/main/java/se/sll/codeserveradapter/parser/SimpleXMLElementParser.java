@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package se.sll.codeserveradapter.paymentresponsible.util;
+package se.sll.codeserveradapter.parser;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;

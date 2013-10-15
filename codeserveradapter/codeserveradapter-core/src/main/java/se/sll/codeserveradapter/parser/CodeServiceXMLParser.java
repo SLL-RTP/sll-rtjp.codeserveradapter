@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package se.sll.codeserveradapter.paymentresponsible.util;
+package se.sll.codeserveradapter.parser;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -34,8 +34,6 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import se.sll.codeserveradapter.paymentresponsible.model.AbstractTermItem;
-import se.sll.codeserveradapter.paymentresponsible.model.CodeServiceEntry;
 
 /**
  * Parses codeserver XML input based on the streaming parser (StAX) <p>
@@ -49,7 +47,7 @@ import se.sll.codeserveradapter.paymentresponsible.model.CodeServiceEntry;
  */
 public class CodeServiceXMLParser {
 
-    static final Date ONE_YEAR_BACK;
+    public static final Date ONE_YEAR_BACK;
     static { 
         final Calendar cal = Calendar.getInstance();
         cal.add(Calendar.YEAR, -1);
