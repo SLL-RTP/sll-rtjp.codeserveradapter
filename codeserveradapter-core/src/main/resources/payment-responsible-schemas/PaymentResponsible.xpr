@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="14.2">
+    <meta>
+        <filters directoryPatterns="" filePatterns="" positiveFilePatterns="" showHiddenFiles="false"/>
+        <options/>
+    </meta>
+    <projectTree name="PaymentResponsible.xpr">
+        <folder path="core_components/"/>
+        <folder path="interactions/"/>
+    </projectTree>
+</project>

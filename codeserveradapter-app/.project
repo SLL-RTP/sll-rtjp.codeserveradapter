@@ -1,0 +1,19 @@
+<projectDescription>
+  <name>codeserveradapter-app</name>
+  <comment>The default parent pom for components that use soi-toolkit, e.g. integration and schema components. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
+  <projects>
+    <project>codeserveradapter-core</project>
+  </projects>
+  <buildSpec>
+    <buildCommand>
+      <name>org.eclipse.jdt.core.javabuilder</name>
+    </buildCommand>
+    <buildCommand>
+      <name>org.mule.tooling.core.muleBuilder</name>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.eclipse.jdt.core.javanature</nature>
+    <nature>org.mule.tooling.core.muleNature</nature>
+  </natures>
+</projectDescription>
