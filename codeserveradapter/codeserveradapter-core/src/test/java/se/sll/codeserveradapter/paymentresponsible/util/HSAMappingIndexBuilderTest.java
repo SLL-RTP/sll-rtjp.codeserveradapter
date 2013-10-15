@@ -24,7 +24,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import se.sll.codeserveradapter.paymentresponsible.model.HSAMapping;
+import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingBean;
 
 public class HSAMappingIndexBuilderTest {
    
@@ -37,13 +37,13 @@ public class HSAMappingIndexBuilderTest {
         .withFacilityFile("src/test/resources/test-files/AVD-REL.xml")
         .withMekFile("src/test/resources/test-files/MEK.xml");
         
-        final Map<String, List<HSAMapping>> index = builder.build();
+        final Map<String, List<HSAMappingBean>> index = builder.build();
       
         assertTrue(index.size() > 4000);
         
-        for (List<HSAMapping> list : index.values()) {
+        for (List<HSAMappingBean> list : index.values()) {
             assertFalse(list.size() == 0);
-            for (HSAMapping mapping : list) {
+            for (HSAMappingBean mapping : list) {
                 assertNotNull(mapping.getFacility());
                 assertTrue(mapping.getValidFrom().before(mapping.getValidTo()));
             }

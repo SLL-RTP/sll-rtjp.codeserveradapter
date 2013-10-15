@@ -16,22 +16,26 @@
 package se.sll.codeserveradapter.paymentresponsible.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 
-public class HSAMapping extends AbstractTermItem implements Serializable {
+/**
+ * 
+ * @author Peter
+ *
+ */
+public class FacilityBean extends AbstractTermItem  implements Serializable {
     private static final long serialVersionUID = 1L;
-    private Facility facility;
+    private List<CommissionBean> commissions = new ArrayList<CommissionBean>();
 
-    public Facility getFacility() {
-        return facility;
+
+    public List<CommissionBean> getCommissions() {
+        return commissions;
     }
 
-    public void setFacility(Facility facility) {
-        this.facility = facility;
+    public void setCommissions(List<CommissionBean> commissions) {
+        this.commissions = commissions;
     }
 
-    @Override
-    public String toString() {
-        return String.format("HSAId: %s, Kombika: %s, Period: %3$tY-%3$tm-%3$td - %4$tY-%4$tm-%4$td", getId(), facility.getId(), getValidFrom(), getValidTo());
-    }
 }

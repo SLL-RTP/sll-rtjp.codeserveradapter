@@ -18,6 +18,19 @@ package se.sll.codeserveradapter.paymentresponsible.model;
 import java.io.Serializable;
 
 
-public class CommissionType extends AbstractTermItem implements Serializable {
+/**
+ * 
+ * @author Peter
+ *
+ */
+public class CommissionBean extends AbstractTermItem implements Serializable {
     private static final long serialVersionUID = 1L;
+    private CommissionTypeBean commissionType;
+
+    public CommissionTypeBean getCommissionType() {
+        return commissionType;
+    }
+    public void setCommissionType(CommissionTypeBean commissionType) {
+        this.commissionType = commissionType;
+    }
 }
