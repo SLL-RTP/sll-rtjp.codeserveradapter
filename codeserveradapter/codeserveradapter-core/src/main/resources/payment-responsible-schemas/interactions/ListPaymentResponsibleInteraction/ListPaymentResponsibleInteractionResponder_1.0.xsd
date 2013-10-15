@@ -16,14 +16,7 @@
 	version='1.0'>
 
 	<xs:import schemaLocation='../../core_components/sll_payment_responsible_1.0.xsd'
-		namespace='urn:riv:sll:paymentresponsible:1' />
-		<!-- 
-	<xs:import schemaLocation='../../kodserver/MEK.xsd' namespace='http://brainpool.se/mek/MEK.xsd' />
-	<xs:import schemaLocation='../../kodserver/SAMVERKS.xsd' namespace='urn:codeservice' />
-    <xs:import schemaLocation='../../kodserver/AVD.xsd' namespace='urn:codeservice' />    
-    <xs:import schemaLocation='../../kodserver/AVTAL.xsd' namespace='urn:codeservice' />    
-    <xs:import schemaLocation='../../kodserver/UPPDRAGSTYP.xsd' namespace='urn:codeservice' /> -->
-      
+		namespace='urn:riv:sll:paymentresponsible:1' />      
 	
 	<xs:element name='ListPaymentResponsibleData' type="core:ListPaymentResponsibleDataRequest" />
 	<xs:element name='ListPaymentResponsibleDataResponse' type="core:ListPaymentResponsibleDataResponse" />

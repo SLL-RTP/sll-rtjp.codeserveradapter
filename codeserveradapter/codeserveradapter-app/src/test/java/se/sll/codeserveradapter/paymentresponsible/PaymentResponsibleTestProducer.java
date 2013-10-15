@@ -45,7 +45,7 @@ public class PaymentResponsibleTestProducer implements ListPaymentResponsibleDat
 
         // Produce the response
         ListPaymentResponsibleDataResponse response = new ListPaymentResponsibleDataResponse();
-        response.setHsaId("Value" + id);
+        response.setHsaId(id);
         return response;
     }
 }
