@@ -32,6 +32,7 @@
     <slf4j.version>1.6.4</slf4j.version>
     <junit.version>4.10</junit.version>
     <commons.lang.version>2.6</commons.lang.version>
+    <spring.version>3.1.1.RELEASE</spring.version>
   </properties>
 
   <build>
@@ -112,6 +113,36 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Spring -->
+       <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-beans</artifactId>
+         <version>${spring.version}</version>
+       </dependency>
+       <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-core</artifactId>
+         <version>${spring.version}</version>
+       </dependency>
+       <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-context</artifactId>
+	 <version>${spring.version}</version>
+	 <exclusions>
+           <!-- Exclude Commons Logging in favor of SLF4j -->
+	   <exclusion>
+             <groupId>commons-logging</groupId>
+             <artifactId>commons-logging</artifactId>
+           </exclusion>
+         </exclusions>
+       </dependency>
+       <dependency>
+         <groupId>org.springframework</groupId>
+	 <artifactId>spring-test</artifactId>
+         <version>${spring.version}</version>
+         <scope>test</scope>
+       </dependency>
+       <!-- Log -->
       <dependency>
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
