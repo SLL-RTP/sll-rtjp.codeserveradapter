@@ -26,6 +26,7 @@
   </modules>
 
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <apache.cxf.version>2.5.7</apache.cxf.version>
     <log4j.version>1.2.14</log4j.version>
     <slf4j.version>1.6.4</slf4j.version>
