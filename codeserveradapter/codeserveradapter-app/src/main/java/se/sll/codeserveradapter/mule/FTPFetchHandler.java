@@ -34,7 +34,7 @@ public class FTPFetchHandler implements Callable {
     public Object onCall(MuleEventContext eventContext) throws Exception {
         log.info("Parsing input.");
  
-        HSAMappingService.getInstance().revalidate();
+        //HSAMappingService.getInstance().revalidate();
         
         return eventContext.getMessage();
     }
