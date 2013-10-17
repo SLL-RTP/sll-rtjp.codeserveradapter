@@ -15,6 +15,7 @@
  */
 package se.sll.codeserveradapter.parser;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,9 +26,19 @@ import java.util.Map;
  * @author Peter
  *
  */
-public class CodeServiceEntry extends AbstractTermItem {
+public class CodeServiceEntry extends State implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private String id;
     private Map<String, String> attributes = new HashMap<String, String>();
     private Map<String, List<String>> codes = new HashMap<String, List<String>>();
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public void setAttribute(String name, String value) {
         attributes.put(name, value);
@@ -50,3 +61,4 @@ public class CodeServiceEntry extends AbstractTermItem {
         return codes.get(name);
     }
 }
+

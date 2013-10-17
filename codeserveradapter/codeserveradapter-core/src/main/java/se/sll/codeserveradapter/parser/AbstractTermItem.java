@@ -15,35 +15,19 @@
  */
 package se.sll.codeserveradapter.parser;
 
+import java.util.ArrayList;
 import java.util.Date;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
+import java.util.List;
 
 /**
  * 
  * @author Peter
  *
  */
-public class AbstractTermItem implements Comparable<AbstractTermItem> {
-    static Date MAX_DATE = new Date(Long.MAX_VALUE);
-    static Date MIN_DATE = new Date(0L);
-
-    static DatatypeFactory datatypeFactory;
-    static {
-        try {
-            datatypeFactory = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
+public class AbstractTermItem<T extends State> {
     private String id;
-    private String name;
-    private Date validFrom = MIN_DATE;
-    private Date validTo = MAX_DATE;
-
+    private List<T> stateVector = new ArrayList<T>();
+    
     public String getId() {
         return id;
     }
@@ -51,48 +35,24 @@ public class AbstractTermItem implements Comparable<AbstractTermItem> {
     public void setId(String id) {
         this.id = id;
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Date getValidFrom() {
-        return validFrom;
-    }
-
-    public void setValidFrom(Date validFrom) {
-        this.validFrom = (validFrom == null) ? MIN_DATE :validFrom;
-    }
-
-    public Date getValidTo() {
-        return validTo;
-    }
-
-    public void setValidTo(Date validTo) {
-        this.validTo = (validTo == null) ? MAX_DATE : validTo;
+    
+    public List<T> getStateVector() {
+        return stateVector;
     }
     
-    
-    public boolean isNewerThan(AbstractTermItem anotherItem) {
-        if (anotherItem == null) {
-            return true;
-        }        
-        return isNewerThan(anotherItem.getValidTo());
+    public void addState(final T state) {
+        stateVector.add(state);
     }
     
-    public boolean isNewerThan(Date date) {
-        return getValidTo().after(date);
+    public T getState(final Date date) {
+        for (final T state : stateVector) {
+            if (state.getValidFrom().before(date) && state.getValidTo().after(date)) {
+                return state;
+            }
+        }
+        return null;
     }
-    
-    public static Date toDate(String xmlDateTime) {
-        final XMLGregorianCalendar cal = datatypeFactory.newXMLGregorianCalendar(xmlDateTime);
-        return cal.toGregorianCalendar().getTime();    
-    }
-    
+
     @Override
     public int hashCode() {
         final String id = getId();
@@ -105,13 +65,8 @@ public class AbstractTermItem implements Comparable<AbstractTermItem> {
             return true;
         }
         if (another instanceof AbstractTermItem) { 
-            return getId().equals(((AbstractTermItem)another).getId());
+            return getId().equals(((AbstractTermItem<?>)another).getId());
         }
         return false;
-    }
-
-    @Override
-    public int compareTo(AbstractTermItem other) {
-        return getValidFrom().compareTo(other.getValidFrom());
     }
 }

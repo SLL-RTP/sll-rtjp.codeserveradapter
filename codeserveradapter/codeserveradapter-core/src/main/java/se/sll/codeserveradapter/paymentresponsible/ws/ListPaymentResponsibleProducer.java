@@ -15,6 +15,8 @@
  */
 package se.sll.codeserveradapter.paymentresponsible.ws;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -33,6 +35,7 @@ import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPay
 import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataResponse;
 import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataResponseType;
 import se.sll.codeserveradapter.paymentresponsible.model.CommissionBean;
+import se.sll.codeserveradapter.paymentresponsible.model.FacilityBean;
 import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingBean;
 import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
@@ -88,18 +91,26 @@ public class ListPaymentResponsibleProducer implements ListPaymentResponsibleDat
         final List<HSAMappingBean> hsaMappingBeans = index.get(request.getHsaId());
         if (hsaMappingBeans != null) {
             for (HSAMappingBean hsaMappingBean : hsaMappingBeans) {
-                for (CommissionBean commissionBean : hsaMappingBean.getFacility().getCommissions()) {
-                    if (commissionBean.getValidFrom().before(eventTime) && commissionBean.getValidTo().after(eventTime)) {
+                for (HSAMappingBean.HSAMappingState mappingState : hsaMappingBean.getStateVector()) {
+                    final FacilityBean.FacilityState facilityState = mappingState.getFacility().getState(eventTime);
+                    if (facilityState == null) {
+                        continue;
+                    }
+                    for (CommissionBean commissionBean : facilityState.getCommissions()) {
+                        final CommissionBean.CommissionState commissionState = commissionBean.getState(eventTime);
+                        if (commissionState == null) {
+                            continue;
+                        }
                         final Commission commission = new Commission();
                         commission.setId(commissionBean.getId());
-                        commission.setType(commissionBean.getCommissionType().getName());
-                        commission.setValidFrom(toTime(commissionBean.getValidFrom()));
-                        commission.setValidTo(toTime(commissionBean.getValidTo()));
-                        commission.setKombikaId(hsaMappingBean.getFacility().getId());
-                        commission.setName(commissionBean.getName());
-                        Commission prev = map.get(commission.getId());
+                        commission.setType(commissionState.getCommissionType().getState(eventTime).getName());
+                        commission.setValidFrom(toTime(commissionState.getValidFrom()));
+                        commission.setValidTo(toTime(commissionState.getValidTo()));
+                        commission.setKombikaId(mappingState.getFacility().getId());
+                        commission.setName(commissionState.getName());
+                        final Commission prev = map.get(commission.getId());
                         if (prev != null) {
-                            prev.setKombikaId(prev.getKombikaId() + "," + hsaMappingBean.getFacility().getId());
+                            prev.setKombikaId(prev.getKombikaId() + "," + mappingState.getFacility().getId());
                         } else {
                             map.put(commission.getId(), commission);
                         }
@@ -107,6 +118,14 @@ public class ListPaymentResponsibleProducer implements ListPaymentResponsibleDat
                 }
             }
             data.getCommissionList().addAll(map.values());
+
+            // sort stuff in time order
+            Collections.sort(data.getCommissionList(), new Comparator<Commission>() {
+                @Override
+                public int compare(Commission left, Commission right) {
+                    return left.getValidFrom().compare(right.getValidFrom());
+                }
+            });
             response.setPaymentResponsibleData(data);
             rc.setCode(ResultCodeEnumType.OK);
         } else {

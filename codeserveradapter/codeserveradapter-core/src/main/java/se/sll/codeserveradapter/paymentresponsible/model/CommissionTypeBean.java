@@ -18,8 +18,14 @@ package se.sll.codeserveradapter.paymentresponsible.model;
 import java.io.Serializable;
 
 import se.sll.codeserveradapter.parser.AbstractTermItem;
+import se.sll.codeserveradapter.parser.State;
 
 
-public class CommissionTypeBean extends AbstractTermItem implements Serializable {
+public class CommissionTypeBean extends AbstractTermItem<CommissionTypeBean.CommissionTypeState> implements Serializable {
     private static final long serialVersionUID = 1L;
+    
+    public static class CommissionTypeState extends State implements Serializable {
+        private static final long serialVersionUID = 1L;
+        
+    }
 }

@@ -16,7 +16,6 @@
 package se.sll.codeserveradapter.paymentresponsible.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -25,17 +24,16 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import se.sll.codeserveradapter.parser.AbstractTermItem;
 import se.sll.codeserveradapter.parser.CodeServiceEntry;
 import se.sll.codeserveradapter.parser.CodeServiceXMLParser;
+import se.sll.codeserveradapter.parser.CodeServiceXMLParser.CodeServiceEntryCallback;
 import se.sll.codeserveradapter.parser.SimpleXMLElementParser;
+import se.sll.codeserveradapter.parser.SimpleXMLElementParser.ElementMatcherCallback;
+import se.sll.codeserveradapter.parser.State;
 import se.sll.codeserveradapter.paymentresponsible.model.CommissionBean;
 import se.sll.codeserveradapter.paymentresponsible.model.CommissionTypeBean;
 import se.sll.codeserveradapter.paymentresponsible.model.FacilityBean;
 import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingBean;
-
-import static se.sll.codeserveradapter.parser.CodeServiceXMLParser.CodeServiceEntryCallback;
-import static se.sll.codeserveradapter.parser.SimpleXMLElementParser.ElementMatcherCallback;
 
 /**
  * Builds HSA Mapping index.
@@ -57,7 +55,7 @@ public class HSAMappingIndexBuilder {
     private String commissionFile;
     private String commissionTypeFile;
     private Date newerThan = CodeServiceXMLParser.ONE_YEAR_BACK;
-    
+
     /**
      * Input file for mapping (MEK) data (mandatory).
      * 
@@ -90,7 +88,7 @@ public class HSAMappingIndexBuilder {
         this.commissionFile = commissionFile;
         return this;
     }
-    
+
     /**
      * Input file for commission type (UPPDRAGSTYP) data (mandatory).
      * 
@@ -101,7 +99,7 @@ public class HSAMappingIndexBuilder {
         this.commissionTypeFile = commissionTypeFile;
         return this;
     }
-    
+
     /**
      * Indicates how to filter out old data items, default setting is to keep one year old data, i.e.
      * expiration date is less than one year back in time.
@@ -113,7 +111,7 @@ public class HSAMappingIndexBuilder {
         this.newerThan = newerThan;
         return this;
     }
-    
+
     /**
      * Builds the index.
      * 
@@ -127,7 +125,7 @@ public class HSAMappingIndexBuilder {
         log.info("build commissionIndex from: {}", commissionFile);
         final HashMap<String, CommissionBean> commissionIndex = createCommissionIndex(commissionTypeIndex);
         log.info("commissionIndex size: {}", commissionIndex.size());
-        
+
         log.info("build facilityIndex from: {}", facilityFIle);
         final HashMap<String, FacilityBean> facilityIndex = createFacilityIndex(commissionIndex);
         log.info("facilityIndex size: {}", facilityIndex.size());
@@ -138,7 +136,7 @@ public class HSAMappingIndexBuilder {
 
         return hsaIndex;
     }
-    
+
     //
     protected Map<String, List<HSAMappingBean>> createHSAIndex(final HashMap<String, FacilityBean> avdIndex) {
         SimpleXMLElementParser elementParser = new SimpleXMLElementParser(this.mekFile);
@@ -153,49 +151,48 @@ public class HSAMappingIndexBuilder {
 
         elementParser.parse("mappning", elements, new ElementMatcherCallback() {
             private HSAMappingBean mapping = null;
+            private HSAMappingBean.HSAMappingState state = null;
             @Override
             public void match(int element, String data) {
                 switch (element) {
                 case 1:
-                    mapping.setFacility(avdIndex.get(data));
+                    state.setFacility(avdIndex.get(data));
                     break;
                 case 2:
                     mapping.setId(data);
                     break;
                 case 3:
-                    mapping.setValidFrom(AbstractTermItem.toDate(data));
+                    state.setValidFrom(State.toDate(data));
                     break;
                 case 4:
-                    mapping.setValidTo(AbstractTermItem.toDate(data));
+                    state.setValidTo(State.toDate(data));
                     break;
                 }
             }
 
             @Override
             public void end() {
-                if (mapping.isNewerThan(newerThan) && mapping.getFacility() != null) {
+                if (state.isNewerThan(newerThan) && state.getFacility() != null) {
                     List<HSAMappingBean> list = map.get(mapping.getId());
                     if (list == null) {
                         list = new ArrayList<HSAMappingBean>();
                         map.put(mapping.getId(), list);
                     }
+                    mapping.addState(state);
                     list.add(mapping);
                 }
             }
 
             @Override
             public void begin() {
+                state = new HSAMappingBean.HSAMappingState();
                 mapping = new HSAMappingBean();
             }
         });
 
-        for (List<HSAMappingBean> l : map.values()) {
-            Collections.sort(l);
-        }
-
         return map;
     }
-    
+
 
     //
     protected HashMap<String, FacilityBean> createFacilityIndex(final HashMap<String, CommissionBean> samverksIndex) {
@@ -210,22 +207,24 @@ public class HSAMappingIndexBuilder {
                     if (codes.size() == 1 && NO_COMMISSION_ID.equals(codes.get(0))) {
                         return;
                     }
-                    final FacilityBean prev = index.get(codeServiceEntry.getId());
-                    if (codeServiceEntry.isNewerThan(prev)) {
-                        final FacilityBean avd = new FacilityBean();
+                    FacilityBean avd = index.get(codeServiceEntry.getId());
+                    if (avd == null) {
+                        avd = new FacilityBean();
                         avd.setId(codeServiceEntry.getId());
-                        avd.setName(codeServiceEntry.getAttribute(SHORTNAME));
-                        avd.setValidFrom(codeServiceEntry.getValidFrom());
-                        avd.setValidTo(codeServiceEntry.getValidTo());
-                        for (final String id : codes) {
-                            final CommissionBean samverks = samverksIndex.get(id);
-                            // don't add the same twice
-                            if (samverks != null && !avd.getCommissions().contains(samverks)) {
-                                avd.getCommissions().add(samverks);
-                            }
-                        }
                         index.put(codeServiceEntry.getId(), avd);
                     }
+                    final FacilityBean.FacilityState state = new FacilityBean.FacilityState();
+                    state.setName(codeServiceEntry.getAttribute(SHORTNAME));
+                    state.setValidFrom(codeServiceEntry.getValidFrom());
+                    state.setValidTo(codeServiceEntry.getValidTo());
+                    for (final String id : codes) {
+                        final CommissionBean samverks = samverksIndex.get(id);
+                        // don't add the same twice
+                        if (samverks != null) {
+                            state.getCommissions().add(samverks);
+                        }
+                    }
+                    avd.addState(state);
                 }
             }
         });
@@ -233,7 +232,7 @@ public class HSAMappingIndexBuilder {
         parser.extractAttribute(SHORTNAME);
         parser.extractCodeSystem(SAMVERKS);
         parser.setNewerThan(newerThan);
-        
+
         parser.parse();
 
         return index;
@@ -246,32 +245,34 @@ public class HSAMappingIndexBuilder {
         CodeServiceXMLParser parser = new CodeServiceXMLParser(this.commissionFile, new CodeServiceEntryCallback() {
             @Override
             public void onCodeServiceEntry(CodeServiceEntry codeServiceEntry) {
-                final CommissionBean prev = index.get(codeServiceEntry.getId());
-                if (codeServiceEntry.isNewerThan(prev)) {
-                    CommissionTypeBean uppdragstyp = null;
-                    List<String> ul = codeServiceEntry.getCodes(UPPDRAGSTYP);
-                    if (ul != null && ul.size() == 1) {
-                        uppdragstyp = uppdragstypIndex.get(ul.get(0));
-                    }
-                    if (uppdragstyp != null) {
-                        final CommissionBean samverks = new CommissionBean();
-                        samverks.setId(codeServiceEntry.getId());
-                        samverks.setName(codeServiceEntry.getAttribute(ABBREVIATION));
-                        samverks.setCommissionType(uppdragstyp);
-                        samverks.setValidFrom(codeServiceEntry.getValidFrom());
-                        samverks.setValidTo(codeServiceEntry.getValidTo());
-                        index.put(codeServiceEntry.getId(), samverks);
-                    }
+                CommissionTypeBean uppdragstyp = null;
+                List<String> ul = codeServiceEntry.getCodes(UPPDRAGSTYP);
+                if (ul != null && ul.size() == 1) {
+                    uppdragstyp = uppdragstypIndex.get(ul.get(0));
                 }
+                if (uppdragstyp == null) {
+                    return;
+                }
+                CommissionBean commission = index.get(codeServiceEntry.getId());
+                if (commission == null) {
+                    commission = new CommissionBean();
+                    commission.setId(codeServiceEntry.getId());
+                    index.put(codeServiceEntry.getId(), commission);
+                }
+                final CommissionBean.CommissionState state = new CommissionBean.CommissionState();
+                state.setName(codeServiceEntry.getAttribute(ABBREVIATION));
+                state.setCommissionType(uppdragstyp);
+                state.setValidFrom(codeServiceEntry.getValidFrom());
+                state.setValidTo(codeServiceEntry.getValidTo());
+                commission.addState(state);
             }
         });
 
         parser.extractAttribute(ABBREVIATION);
         parser.extractCodeSystem(UPPDRAGSTYP);
         parser.setNewerThan(newerThan);
-        
-        parser.parse();
 
+        parser.parse();
 
         return index;
     }
@@ -283,15 +284,17 @@ public class HSAMappingIndexBuilder {
         CodeServiceXMLParser parser = new CodeServiceXMLParser(this.commissionTypeFile, new CodeServiceEntryCallback() {
             @Override
             public void onCodeServiceEntry(CodeServiceEntry codeServiceEntry) {
-                final CommissionTypeBean prev = index.get(codeServiceEntry.getId());
-                if (codeServiceEntry.isNewerThan(prev)) {
-                    final CommissionTypeBean uppdragstyp = new CommissionTypeBean();
-                    uppdragstyp.setId(codeServiceEntry.getId());
-                    uppdragstyp.setName(codeServiceEntry.getAttribute(SHORTNAME));
-                    uppdragstyp.setValidFrom(codeServiceEntry.getValidFrom());
-                    uppdragstyp.setValidTo(uppdragstyp.getValidTo());
-                    index.put(codeServiceEntry.getId(), uppdragstyp);
+                CommissionTypeBean commissionType = index.get(codeServiceEntry.getId());
+                if (commissionType == null) {
+                    commissionType = new CommissionTypeBean();
+                    commissionType.setId(codeServiceEntry.getId());
+                    index.put(codeServiceEntry.getId(), commissionType);
                 }
+                final CommissionTypeBean.CommissionTypeState state = new CommissionTypeBean.CommissionTypeState();
+                state.setName(codeServiceEntry.getAttribute(SHORTNAME));
+                state.setValidFrom(codeServiceEntry.getValidFrom());
+                state.setValidTo(codeServiceEntry.getValidTo());
+                commissionType.addState(state);
             }
         });
 
@@ -299,7 +302,7 @@ public class HSAMappingIndexBuilder {
         parser.setNewerThan(newerThan);
 
         parser.parse();
-        
+
         return index;
     }    
 }

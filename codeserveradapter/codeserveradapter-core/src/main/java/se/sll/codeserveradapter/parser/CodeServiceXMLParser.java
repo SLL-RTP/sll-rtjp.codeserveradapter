@@ -192,11 +192,11 @@ public class CodeServiceXMLParser {
             switch (e.getEventType()) {
             case XMLEvent.START_ELEMENT:
                 if (same(e.asStartElement(), TERMITEMENTRY)) {
-                    final Date expirationDate = AbstractTermItem.toDate(attribute(e.asStartElement(), "expirationdate"));
+                    final Date expirationDate = State.toDate(attribute(e.asStartElement(), "expirationdate"));
                     // avoid unnecessary processing, and check time before creating item
                     if (expirationDate.after(newerThan)) {
                         final CodeServiceEntry codeServiceEntry = processCodeServiceEntry(e.asStartElement());
-                        codeServiceEntry.setValidFrom(AbstractTermItem.toDate(attribute(e.asStartElement(), "begindate")));
+                        codeServiceEntry.setValidFrom(State.toDate(attribute(e.asStartElement(), "begindate")));
                         codeServiceEntry.setValidTo(expirationDate);
                         codeServiceEntryCallback.onCodeServiceEntry(codeServiceEntry);
                     }
@@ -209,7 +209,7 @@ public class CodeServiceXMLParser {
 
     //
     private CodeServiceEntry processCodeServiceEntry(StartElement startElement) throws XMLStreamException {
-        CodeServiceEntry codeServiceEntry = new CodeServiceEntry();
+        final CodeServiceEntry codeServiceEntry = new CodeServiceEntry();
         codeServiceEntry.setId(attribute(startElement, ID));
         while (reader.hasNext()) {
             final XMLEvent e = reader.nextEvent();
@@ -234,12 +234,12 @@ public class CodeServiceXMLParser {
     }
 
     private void processAttributeValue(String name,
-            CodeServiceEntry codeServiceEntry) throws XMLStreamException {
+            CodeServiceEntry state) throws XMLStreamException {
         while (reader.hasNext()) {
             final XMLEvent e = reader.nextEvent();
             switch (e.getEventType()) {
             case XMLEvent.CHARACTERS:
-                codeServiceEntry.setAttribute(name, e.asCharacters().getData());
+                state.setAttribute(name, e.asCharacters().getData());
                 break;
             case XMLEvent.END_ELEMENT:
                 if (same(e.asEndElement(), ATTRIBUTE)) {
@@ -252,7 +252,7 @@ public class CodeServiceXMLParser {
 
 
     //
-    private void processCodeValue(CodeServiceEntry codeServiceEntry) throws XMLStreamException {
+    private void processCodeValue(CodeServiceEntry state) throws XMLStreamException {
         while (reader.hasNext()) {
             final XMLEvent e = reader.nextEvent();
             switch (e.getEventType()) {
@@ -260,7 +260,7 @@ public class CodeServiceXMLParser {
                 if (same(e.asStartElement(), CODEDVALUE)) {
                     final String codeSystem = attribute(e.asStartElement(), CODESYSTEM);
                     if (extractFilter.contains(CODE_PREFIX + codeSystem)) {
-                        codeServiceEntry.addCode(codeSystem, attribute(e.asStartElement(), CODE));
+                        state.addCode(codeSystem, attribute(e.asStartElement(), CODE));
                     }
                 }
                 break;

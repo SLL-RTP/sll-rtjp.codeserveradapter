@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import se.sll.codeserveradapter.parser.AbstractTermItem;
+import se.sll.codeserveradapter.parser.State;
 
 
 /**
@@ -27,17 +28,20 @@ import se.sll.codeserveradapter.parser.AbstractTermItem;
  * @author Peter
  *
  */
-public class FacilityBean extends AbstractTermItem  implements Serializable {
+public class FacilityBean extends AbstractTermItem<FacilityBean.FacilityState>  implements Serializable {
     private static final long serialVersionUID = 1L;
-    private List<CommissionBean> commissions = new ArrayList<CommissionBean>();
+    
+    public static class FacilityState extends State implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private List<CommissionBean> commissions = new ArrayList<CommissionBean>();
 
 
-    public List<CommissionBean> getCommissions() {
-        return commissions;
+        public List<CommissionBean> getCommissions() {
+            return commissions;
+        }
+
+        public void setCommissions(List<CommissionBean> commissions) {
+            this.commissions = commissions;
+        }        
     }
-
-    public void setCommissions(List<CommissionBean> commissions) {
-        this.commissions = commissions;
-    }
-
 }

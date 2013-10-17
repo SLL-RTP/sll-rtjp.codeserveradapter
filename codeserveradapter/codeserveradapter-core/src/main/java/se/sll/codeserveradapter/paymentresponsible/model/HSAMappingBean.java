@@ -18,22 +18,23 @@ package se.sll.codeserveradapter.paymentresponsible.model;
 import java.io.Serializable;
 
 import se.sll.codeserveradapter.parser.AbstractTermItem;
+import se.sll.codeserveradapter.parser.State;
 
 
-public class HSAMappingBean extends AbstractTermItem implements Serializable {
+public class HSAMappingBean extends AbstractTermItem<HSAMappingBean.HSAMappingState> implements Serializable {
     private static final long serialVersionUID = 1L;
-    private FacilityBean facility;
+    
+    public static class HSAMappingState extends State implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private FacilityBean facility;
 
-    public FacilityBean getFacility() {
-        return facility;
+        public FacilityBean getFacility() {
+            return facility;
+        }
+
+        public void setFacility(FacilityBean facility) {
+            this.facility = facility;
+        }
     }
 
-    public void setFacility(FacilityBean facility) {
-        this.facility = facility;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("HSAId: %s, Kombika: %s, Period: %3$tY-%3$tm-%3$td - %4$tY-%4$tm-%4$td", getId(), facility.getId(), getValidFrom(), getValidTo());
-    }
 }

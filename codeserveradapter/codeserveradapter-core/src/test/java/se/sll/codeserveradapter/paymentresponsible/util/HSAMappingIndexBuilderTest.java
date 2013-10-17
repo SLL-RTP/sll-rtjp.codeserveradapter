@@ -16,7 +16,6 @@
 package se.sll.codeserveradapter.paymentresponsible.util;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -44,8 +43,7 @@ public class HSAMappingIndexBuilderTest extends TestSupport {
         for (List<HSAMappingBean> list : index.values()) {
             assertFalse(list.size() == 0);
             for (HSAMappingBean mapping : list) {
-                assertNotNull(mapping.getFacility());
-                assertTrue(mapping.getValidFrom().before(mapping.getValidTo()));
+                assertTrue(mapping.getStateVector().size() > 0);
             }
         }
     }
