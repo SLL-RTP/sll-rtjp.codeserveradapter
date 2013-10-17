@@ -39,7 +39,7 @@ public class HSAMappingService {
 
     @Value("${pr.ftp.localPath:}")
     private String localPath;
-    
+
     @Value("${pr.indexFile:/tmp/hsa-index.gz}")
     private String fileName;
 
@@ -51,23 +51,24 @@ public class HSAMappingService {
 
     @Value("${pr.facilityFile}")
     private String facilityFile;
-    
+
     @Value("${pr.mekFile}")
     private String mekFile;
-    
+
     private boolean busy;
     private static HSAMappingService instance;
     private static final Logger log = LoggerFactory.getLogger(HSAMappingService.class);
 
 
     private Map<String, List<HSAMappingBean>> currentIndex;
+    private final Object buildLock = new Object();
 
     public HSAMappingService() {
         if (instance == null) {
             instance = this;
         }
-     }
-    
+    }
+
     private String path(String name) {
         return localPath + (localPath.endsWith("/") ? "" : "/") + name;
     }
@@ -92,17 +93,22 @@ public class HSAMappingService {
         this.busy = busy;
     }
 
-    public synchronized void revalidate() {
+    public void revalidate() {
         if (isBusy()) {
             return;
         }
-        setBusy(true);
-        try {
-            final Map<String, List<HSAMappingBean>> index = build();
-            save(index);
-            setCurrentIndex(index);
-        } finally {
-            setBusy(false);            
+        synchronized (buildLock) {
+            if (isBusy()) {
+                return;
+            }
+            setBusy(true);
+            try {
+                final Map<String, List<HSAMappingBean>> index = build();
+                save(index);
+                setCurrentIndex(index);
+            } finally {
+                setBusy(false);            
+            }
         }
     }
 

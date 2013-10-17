@@ -92,6 +92,23 @@ public class AbstractTermItem implements Comparable<AbstractTermItem> {
         final XMLGregorianCalendar cal = datatypeFactory.newXMLGregorianCalendar(xmlDateTime);
         return cal.toGregorianCalendar().getTime();    
     }
+    
+    @Override
+    public int hashCode() {
+        final String id = getId();
+        return (id == null) ? super.hashCode() : id.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object another) {
+        if (this == another) {
+            return true;
+        }
+        if (another instanceof AbstractTermItem) { 
+            return getId().equals(((AbstractTermItem)another).getId());
+        }
+        return false;
+    }
 
     @Override
     public int compareTo(AbstractTermItem other) {

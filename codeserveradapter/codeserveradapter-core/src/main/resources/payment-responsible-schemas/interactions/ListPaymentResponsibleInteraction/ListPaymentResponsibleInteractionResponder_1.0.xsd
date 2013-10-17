@@ -9,17 +9,49 @@
 	under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES 
 	OR CONDITIONS OF ANY KIND, either express or implied. See the License for 
 	the specific language governing permissions and limitations under the License. -->
-	<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'
+<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'
 	xmlns:tns='urn:riv:sll:paymentresponsible:ListPaymentResponsibleDataResponder:1'
-	xmlns:core='urn:riv:sll:paymentresponsible:1' targetNamespace='urn:riv:sll:paymentresponsible:ListPaymentResponsibleDataResponder:1'
+	xmlns:core='urn:riv:sll:paymentresponsible:1'
+	targetNamespace='urn:riv:sll:paymentresponsible:ListPaymentResponsibleDataResponder:1'
 	elementFormDefault='qualified' attributeFormDefault='unqualified'
 	version='1.0'>
 
 	<xs:import schemaLocation='../../core_components/sll_payment_responsible_1.0.xsd'
-		namespace='urn:riv:sll:paymentresponsible:1' />      
+		namespace='urn:riv:sll:paymentresponsible:1' />
+
+	<xs:element name='ListPaymentResponsibleData' type="tns:ListPaymentResponsibleDataRequest" />
+	<xs:element name='ListPaymentResponsibleDataResponse' type="tns:ListPaymentResponsibleDataResponseType" />
+
+	<xs:complexType name="ListPaymentResponsibleDataRequest">
+		<xs:sequence>
+			<xs:element name="hsaId" type="xs:string" />
+			<xs:element name="serviceCode" type="xs:string" />
+			<xs:element name="eventTime" type="xs:dateTime" />
+		</xs:sequence>
+	</xs:complexType>
 	
-	<xs:element name='ListPaymentResponsibleData' type="core:ListPaymentResponsibleDataRequest" />
-	<xs:element name='ListPaymentResponsibleDataResponse' type="core:ListPaymentResponsibleDataResponse" />
+	<xs:complexType name="ListPaymentResponsibleDataResponse">
+		<xs:sequence>
+			<xs:element name="hsaId" type="xs:string" />
+			<xs:element name="serviceCode" type="xs:string" />
+			<xs:element name="commissionList" type="core:Commission" minOccurs="1" 
+				maxOccurs="unbounded"/>			
+			<xs:any namespace="##other" processContents="lax" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+
+	<xs:complexType name="ListPaymentResponsibleDataResponseType">
+		<xs:sequence>
+			<xs:element name="resultCode" type="core:ResultCode"
+				maxOccurs="1" minOccurs="1" />
+			<xs:element name='paymentResponsibleData'
+				type="tns:ListPaymentResponsibleDataResponse" minOccurs="0"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
 
 
 </xs:schema>

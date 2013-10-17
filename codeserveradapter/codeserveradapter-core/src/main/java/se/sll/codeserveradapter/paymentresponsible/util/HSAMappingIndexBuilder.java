@@ -219,7 +219,8 @@ public class HSAMappingIndexBuilder {
                         avd.setValidTo(codeServiceEntry.getValidTo());
                         for (final String id : codes) {
                             final CommissionBean samverks = samverksIndex.get(id);
-                            if (samverks != null) {
+                            // don't add the same twice
+                            if (samverks != null && !avd.getCommissions().contains(samverks)) {
                                 avd.getCommissions().add(samverks);
                             }
                         }

@@ -20,9 +20,9 @@ import static se.sll.codeserveradapter.CodeserveradapterMuleServer.getAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import riv.sll.paymentresponsible._1.ListPaymentResponsibleDataRequest;
-import riv.sll.paymentresponsible._1.ListPaymentResponsibleDataResponse;
 import riv.sll.paymentresponsible.listpaymentresponsibledata._1.rivtabp21.ListPaymentResponsibleDataResponderInterface;
+import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataRequest;
+import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataResponseType;
 import se.sll.codeserveradapter.AbstractTestConsumer;
 
 public class PaymentResponsibleTestConsumer extends AbstractTestConsumer<ListPaymentResponsibleDataResponderInterface> {
@@ -38,17 +38,17 @@ public class PaymentResponsibleTestConsumer extends AbstractTestConsumer<ListPay
     public static void main(String[] args) {
             String serviceAddress = getAddress("pr.ws.inboundURL");
             PaymentResponsibleTestConsumer consumer = new PaymentResponsibleTestConsumer(serviceAddress);
-            ListPaymentResponsibleDataResponse response = consumer.callService("1234");
-            log.info("Returned value = " + response.getHsaId());
+            ListPaymentResponsibleDataResponseType response = consumer.callService("1234");
+            log.info("Returned value = " + response.getPaymentResponsibleData().getHsaId());
     }
 
-    public ListPaymentResponsibleDataResponse callService(String id) {
+    public ListPaymentResponsibleDataResponseType callService(String id) {
             log.debug("Calling sample-soap-service with id = {}", id);
             final ListPaymentResponsibleDataRequest request = new ListPaymentResponsibleDataRequest();
             request.setHsaId(id);
-            request.setBookingDate(now());
-            request.setHealcareServiceType(1);
-            final ListPaymentResponsibleDataResponse response = _service.listPaymentResponsibleData("location", request);
+            request.setEventTime(now());
+            request.setServiceCode("01");
+            final ListPaymentResponsibleDataResponseType response = _service.listPaymentResponsibleData("location", request);
             
             return response;
     }	

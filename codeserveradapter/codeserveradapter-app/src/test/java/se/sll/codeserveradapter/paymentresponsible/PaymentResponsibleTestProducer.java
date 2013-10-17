@@ -21,9 +21,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.soitoolkit.commons.mule.util.RecursiveResourceBundle;
 
-import riv.sll.paymentresponsible._1.ListPaymentResponsibleDataRequest;
-import riv.sll.paymentresponsible._1.ListPaymentResponsibleDataResponse;
+import riv.sll.paymentresponsible._1.ResultCode;
+import riv.sll.paymentresponsible._1.ResultCodeEnumType;
 import riv.sll.paymentresponsible.listpaymentresponsibledata._1.rivtabp21.ListPaymentResponsibleDataResponderInterface;
+import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataRequest;
+import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataResponse;
+import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataResponseType;
 
 
 @WebService(serviceName = "sampleService", portName = "samplePort", targetNamespace = "urn:org.soitoolkit.refapps.sd.sample.wsdl:v1", name = "sampleService")
@@ -39,7 +42,7 @@ public class PaymentResponsibleTestProducer implements ListPaymentResponsibleDat
 
 
     @Override
-    public ListPaymentResponsibleDataResponse listPaymentResponsibleData(
+    public ListPaymentResponsibleDataResponseType listPaymentResponsibleData(
            String logicalAddress,
            ListPaymentResponsibleDataRequest request) {
         log.info("PaymentResponsibleTestProducer received the request: {}", request);
@@ -59,8 +62,14 @@ public class PaymentResponsibleTestProducer implements ListPaymentResponsibleDat
         }
 
         // Produce the response
-        ListPaymentResponsibleDataResponse response = new ListPaymentResponsibleDataResponse();
-        response.setHsaId(id);
+        ListPaymentResponsibleDataResponseType response = new ListPaymentResponsibleDataResponseType();
+        ListPaymentResponsibleDataResponse data = new ListPaymentResponsibleDataResponse();
+        response.setPaymentResponsibleData(data);
+        data.setHsaId(id);
+        
+        ResultCode rc = new ResultCode();
+        rc.setCode(ResultCodeEnumType.OK);
+        response.setResultCode(rc);
         return response;
     }
 }

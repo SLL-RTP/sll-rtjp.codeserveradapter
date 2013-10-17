@@ -17,16 +17,19 @@ package se.sll.codeserveradapter.paymentresponsible;
 
 import static org.junit.Assert.assertEquals;
 import static se.sll.codeserveradapter.CodeserveradapterMuleServer.getAddress;
-import static se.sll.codeserveradapter.paymentresponsible.PaymentResponsibleTestProducer.TEST_ID_OK;
 
 import org.junit.Test;
 import org.soitoolkit.commons.mule.test.AbstractJmsTestUtil;
 import org.soitoolkit.commons.mule.test.ActiveMqJmsTestUtil;
 import org.soitoolkit.commons.mule.test.junit4.AbstractTestCase;
 
-import riv.sll.paymentresponsible._1.ListPaymentResponsibleDataResponse;
+import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataResponseType;
 
-
+/**
+ * 
+ * @author Peter
+ *
+ */
 public class PaymentResponsibleIntegrationTest extends AbstractTestCase {
 
 
@@ -49,10 +52,10 @@ public class PaymentResponsibleIntegrationTest extends AbstractTestCase {
         setDisposeContextPerClass(true);
     }
 
+    @Override
     protected String getConfigResources() {
         return "soitoolkit-mule-jms-connector-activemq-embedded.xml,"
-                + "codeserveradapter-common.xml,"
-                + "codeserveradapter-core-spring-context.xml,"
+                + "mule-config.xml,"
                 + "payment-responsible-service.xml";
     }
 
@@ -75,9 +78,9 @@ public class PaymentResponsibleIntegrationTest extends AbstractTestCase {
 
     @Test
     public void test_ok() {
-        String id = TEST_ID_OK;
+        final String id = "SE2321000016-14L4";
         PaymentResponsibleTestConsumer consumer = new PaymentResponsibleTestConsumer(DEFAULT_SERVICE_ADDRESS);
-        ListPaymentResponsibleDataResponse response = consumer.callService(id);
-        assertEquals(id,  response.getHsaId());
+        ListPaymentResponsibleDataResponseType response = consumer.callService(id);
+        assertEquals(id,  response.getPaymentResponsibleData().getHsaId());
     }
 }

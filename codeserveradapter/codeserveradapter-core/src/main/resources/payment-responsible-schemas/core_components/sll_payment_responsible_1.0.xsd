@@ -18,13 +18,6 @@
 		</xs:documentation>
 	</xs:annotation>
 
-	<xs:complexType name="ListPaymentResponsibleDataRequest">
-		<xs:sequence>
-			<xs:element name="hsaId" type="xs:string" />
-			<xs:element name="healcareServiceType" type="xs:long" />
-			<xs:element name="bookingDate" type="xs:dateTime" />
-		</xs:sequence>
-	</xs:complexType>
 
 	<xs:complexType name="Contract">
 		<xs:sequence>
@@ -37,7 +30,11 @@
 	<xs:complexType name="Commission">
 		<xs:sequence>
 			<xs:element name="id" type="xs:string" />
+			<xs:element name="kombikaId" type="xs:string" />
+			<xs:element name="name" type="xs:string" />
 			<xs:element name="type" type="xs:string" />
+			<xs:element name="validFrom" type="xs:dateTime" />
+			<xs:element name="validTo" type="xs:dateTime" />
 			<xs:element name="paymentResponsibleList" type="tns:PaymentResponsible" 
 				minOccurs="1" maxOccurs="unbounded" />			
 		</xs:sequence>
@@ -52,17 +49,6 @@
 		</xs:sequence>
 	</xs:complexType>
 	
-	<xs:complexType name="ListPaymentResponsibleDataResponse">
-		<xs:sequence>
-			<xs:element name="hsaId" type="xs:string" />
-			<xs:element name="serviceType" type="xs:string" />
-			<xs:element name="commission" type="tns:Commission" minOccurs="1" 
-				maxOccurs="unbounded"/>			
-			<xs:any namespace="##other" processContents="lax" minOccurs="0"
-				maxOccurs="unbounded" />
-		</xs:sequence>
-	</xs:complexType>
-
 	<xs:simpleType name="ResultCodeEnumType">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="OK"></xs:enumeration>
