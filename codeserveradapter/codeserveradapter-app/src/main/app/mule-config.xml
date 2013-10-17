@@ -24,10 +24,8 @@
     ">
 
 	<spring:beans>
-		<spring:import resource="classpath:codeserver-core-spring-context.xml" />
 		<spring:import resource="classpath:codeserveradapter-common.xml" />
-		<spring:import resource="payment-responsible-service.xml" />
-		<spring:import resource="ftp-scheduler-service.xml" />
+		<spring:import resource="classpath:codeserveradapter-core-spring-context.xml" />
 	</spring:beans>
 
 </mule>

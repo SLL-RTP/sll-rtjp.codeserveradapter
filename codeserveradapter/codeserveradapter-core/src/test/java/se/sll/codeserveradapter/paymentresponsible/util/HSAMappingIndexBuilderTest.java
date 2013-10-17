@@ -23,21 +23,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import se.sll.codeserveradapter.TestSupport;
 import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingBean;
+import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
-public class HSAMappingIndexBuilderTest {
+public class HSAMappingIndexBuilderTest extends TestSupport {
    
+    @Autowired
+    private HSAMappingService hsaMappingService;
 
     @Test
     public void parse_success() {
-        HSAMappingIndexBuilder builder = new HSAMappingIndexBuilder()
-        .withCommissionFile("src/test/resources/test-files/SAMVERKS-REL.xml")
-        .withCommissionTypeFile("src/test/resources/test-files/UPPDRAGSTYP.xml")
-        .withFacilityFile("src/test/resources/test-files/AVD-REL.xml")
-        .withMekFile("src/test/resources/test-files/MEK.xml");
-        
-        final Map<String, List<HSAMappingBean>> index = builder.build();
+        hsaMappingService.revalidate();
+        final Map<String, List<HSAMappingBean>> index = hsaMappingService.getCurrentIndex();
       
         assertTrue(index.size() > 4000);
         

@@ -15,28 +15,24 @@
  */
 package se.sll.codeserveradapter.mule;
 
-import org.mule.api.MuleEventContext;
-import org.mule.api.lifecycle.Callable;
+import org.mule.api.context.notification.MuleContextNotificationListener;
+import org.mule.context.notification.MuleContextNotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
-public class FTPFetchHandler implements Callable {
-
-    private static final Logger log = LoggerFactory.getLogger(FTPFetchHandler.class);
-
-    public FTPFetchHandler() {
-        log.info("Created.");
-    }
+public class AppContextNotificationListener implements MuleContextNotificationListener<MuleContextNotification> {
+    private final static Logger log = LoggerFactory.getLogger(AppContextNotificationListener.class);
+    
 
     @Override
-    public Object onCall(MuleEventContext eventContext) throws Exception {
-        log.info("Revalidate index.");
-
-        HSAMappingService.getInstance().revalidate();
-        
-        return eventContext.getMessage();
+    public void onNotification(MuleContextNotification notification) {
+        if (notification.getAction() == MuleContextNotification.CONTEXT_STARTED) {
+            log.debug("Context started.");
+            if (HSAMappingService.getInstance().getCurrentIndex() == null) {
+                HSAMappingService.getInstance().revalidate();
+            }
+        }
     }
-
 }

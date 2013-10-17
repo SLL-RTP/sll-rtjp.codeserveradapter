@@ -23,20 +23,42 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingBean;
 import se.sll.codeserveradapter.paymentresponsible.util.HSAMappingIndexBuilder;
 
-//@Service
+@Service
 public class HSAMappingService {
 
-    private String fileName = "/tmp/hsa-index.dat.gz";
+    @Value("${pr.ftp.localPath:}")
+    private String localPath;
+    
+    @Value("${pr.indexFile:/tmp/hsa-index.gz}")
+    private String fileName;
+
+    @Value("${pr.commissionFile}")
+    private String commissionFile;
+
+    @Value("${pr.commissionTypeFile}")
+    private String commissionTypeFile;
+
+    @Value("${pr.facilityFile}")
+    private String facilityFile;
+    
+    @Value("${pr.mekFile}")
+    private String mekFile;
+    
     private boolean busy;
     private static HSAMappingService instance;
+    private static final Logger log = LoggerFactory.getLogger(HSAMappingService.class);
+
 
     private Map<String, List<HSAMappingBean>> currentIndex;
 
@@ -44,17 +66,18 @@ public class HSAMappingService {
         if (instance == null) {
             instance = this;
         }
-        if (getCurrentIndex() == null) {
-            revalidate();
-        }
      }
+    
+    private String path(String name) {
+        return localPath + (localPath.endsWith("/") ? "" : "/") + name;
+    }
 
     private Map<String, List<HSAMappingBean>> build() {
         HSAMappingIndexBuilder builder = new HSAMappingIndexBuilder()
-        .withCommissionFile("src/test/resources/test-files/SAMVERKS-REL.xml")
-        .withCommissionTypeFile("src/test/resources/test-files/UPPDRAGSTYP.xml")
-        .withFacilityFile("src/test/resources/test-files/AVD-REL.xml")
-        .withMekFile("src/test/resources/test-files/MEK.xml");
+        .withCommissionFile(path(commissionFile))
+        .withCommissionTypeFile(path(commissionTypeFile))
+        .withFacilityFile(path(facilityFile))
+        .withMekFile(path(mekFile));
 
         final Map<String, List<HSAMappingBean>> index = builder.build();
 
@@ -87,10 +110,10 @@ public class HSAMappingService {
     private <T> T read() {
         ObjectInputStream is = null;
         try {
-            is = new ObjectInputStream(new ZipInputStream(new FileInputStream(fileName)));
+            is = new ObjectInputStream(new GZIPInputStream(new FileInputStream(fileName)));
             return (T) is.readObject();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn(e.toString());
         } finally {
             close(is);
         }
@@ -100,10 +123,10 @@ public class HSAMappingService {
     private <T> T save(T index) {
         ObjectOutputStream os = null;
         try {
-            os = new ObjectOutputStream(new ZipOutputStream(new FileOutputStream(fileName)));
+            os = new ObjectOutputStream(new GZIPOutputStream(new FileOutputStream(fileName)));
             os.writeObject(index);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Unable to save HSA index", e);
         } finally {
             close(os);
         }

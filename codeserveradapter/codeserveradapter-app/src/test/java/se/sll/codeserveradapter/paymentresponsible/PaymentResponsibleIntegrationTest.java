@@ -49,9 +49,11 @@ public class PaymentResponsibleIntegrationTest extends AbstractTestCase {
     }
 
     protected String getConfigResources() {
-        return "soitoolkit-mule-jms-connector-activemq-embedded.xml," + 
-                "codeserveradapter-common.xml," +
-                "payment-responsible-service.xml";
+        return "soitoolkit-mule-jms-connector-activemq-embedded.xml,"
+                + "codeserveradapter-common.xml,"
+                + "codeserveradapter-core-spring-context.xml,"
+                + "payment-responsible-service.xml,"
+                + "ftp-scheduler-service.xml";
     }
 
     @Override
