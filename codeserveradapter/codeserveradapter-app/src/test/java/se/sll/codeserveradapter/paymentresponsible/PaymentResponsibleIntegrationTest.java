@@ -37,6 +37,7 @@ public class PaymentResponsibleIntegrationTest extends AbstractTestCase {
 
 
     private static final String ERROR_LOG_QUEUE = "SOITOOLKIT.LOG.ERROR";
+    
     private AbstractJmsTestUtil jmsUtil = null;
 
 
@@ -59,7 +60,6 @@ public class PaymentResponsibleIntegrationTest extends AbstractTestCase {
     protected void doSetUp() throws Exception {
         super.doSetUp();
         doSetUpJms();
-
     }
 
     private void doSetUpJms() {
@@ -71,7 +71,7 @@ public class PaymentResponsibleIntegrationTest extends AbstractTestCase {
         // Clear queues used for error handling
         jmsUtil.clearQueues(ERROR_LOG_QUEUE);
     }
-
+    
 
     @Test
     public void test_ok() {

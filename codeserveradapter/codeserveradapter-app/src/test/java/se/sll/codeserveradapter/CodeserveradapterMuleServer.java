@@ -16,10 +16,9 @@
 package se.sll.codeserveradapter;
 
  
+import org.mockftpserver.stub.StubFtpServer;
 import org.soitoolkit.commons.mule.test.StandaloneMuleServer;
-
 import org.soitoolkit.commons.mule.util.RecursiveResourceBundle;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,12 @@ public class CodeserveradapterMuleServer {
 	public static void main(String[] args) throws Exception {
 	
  
-        // Configure the mule-server:
+	    StubFtpServer stubFtpServer = new StubFtpServer();
+	    
+	    stubFtpServer.setServerControlPort(1221);
+        //
+        stubFtpServer.start();
+       // Configure the mule-server:
         //
         // Arg #1: The name of the Mule Server
         //
@@ -47,7 +51,7 @@ public class CodeserveradapterMuleServer {
         //         Note: Actually loads all *-service.xml files that are specified in the file "src/main/app/mule-deploy.properties"
         //
         StandaloneMuleServer muleServer = new StandaloneMuleServer(MULE_SERVER_ID, true, true);
- 
+         
         // Start the server
 		muleServer.run();
 	}
