@@ -76,7 +76,7 @@
 				</spring:value>
 				<spring:value>classpath:codeserveradapter-config.properties
 				</spring:value>
-				<spring:value>classpath:codeserveradapter-config-override.properties
+				<spring:value>file://${user.home}/.codeserveradapter-config.properties
 				</spring:value>
 			</spring:list>
 		</spring:property>
