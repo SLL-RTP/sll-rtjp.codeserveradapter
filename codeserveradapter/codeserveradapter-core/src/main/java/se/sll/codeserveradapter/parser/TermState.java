@@ -15,6 +15,7 @@
  */
 package se.sll.codeserveradapter.parser;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -27,8 +28,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * @author Peter
  *
  */
-public abstract class TermState implements Comparable<TermState> {
-    
+public abstract class TermState implements Comparable<TermState>, Serializable {
+    private static final long serialVersionUID = 1L;
+
     static Date MAX_DATE = new Date(Long.MAX_VALUE);
     static Date MIN_DATE = new Date(0L);
 
