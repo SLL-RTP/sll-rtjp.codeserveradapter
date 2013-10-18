@@ -98,10 +98,13 @@ public class ListPaymentResponsibleProducer implements ListPaymentResponsibleDat
         final Date eventTime = toDate(request.getEventTime());
         final Map<String, Commission> map = new HashMap<String, Commission>();
 
-        for (TermItem<HSAMappingState> hsaMappingTerm : hsaMappingTerms) {
-            for (HSAMappingState mappingState : hsaMappingTerm.getStateVector()) {
+        for (final TermItem<HSAMappingState> hsaMappingTerm : hsaMappingTerms) {
+            final HSAMappingState mappingState = hsaMappingTerm.getState(eventTime);
+            if (mappingState != null) {
                 final FacilityState facilityState = mappingState.getFacility().getState(eventTime);
-                processFacility(facilityState, mappingState.getFacility().getId(), eventTime, map);
+                if (facilityState != null) {
+                    processFacility(facilityState, mappingState.getFacility().getId(), eventTime, map);
+                }
             }
         }
 
@@ -126,10 +129,7 @@ public class ListPaymentResponsibleProducer implements ListPaymentResponsibleDat
             final Date eventTime,  
             final Map<String, Commission> map) {
 
-        if (facilityState == null) {
-            return;
-        }
-        for (TermItem<CommissionState> commissionTerm : facilityState.getCommissions()) {
+        for (final TermItem<CommissionState> commissionTerm : facilityState.getCommissions()) {
             final Commission commission = createCommission(commissionTerm, eventTime);
             if (commission != null) {
                 commission.setKombikaId(kombikaId);

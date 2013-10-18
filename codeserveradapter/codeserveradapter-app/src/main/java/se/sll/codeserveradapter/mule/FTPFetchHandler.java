@@ -22,6 +22,16 @@ import org.slf4j.LoggerFactory;
 
 import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
+/**
+ * Mule component with the only purpose to make an appropriate action 
+ * when new master data files has been downloaded from codeserver using a scheduled job. <p>
+ * 
+ * At the time the only action is to revalidate (rebuild) the index used by the payment 
+ * responsible service.
+ * 
+ * @author Peter
+ *
+ */
 public class FTPFetchHandler implements Callable {
 
     private static final Logger log = LoggerFactory.getLogger(FTPFetchHandler.class);

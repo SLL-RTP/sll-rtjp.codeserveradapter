@@ -22,6 +22,12 @@ import org.slf4j.LoggerFactory;
 
 import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
+/**
+ * Ensures an index is loaded upon startup of application.
+ * 
+ * @author Peter
+ *
+ */
 public class AppContextNotificationListener implements MuleContextNotificationListener<MuleContextNotification> {
     private final static Logger log = LoggerFactory.getLogger(AppContextNotificationListener.class);
     

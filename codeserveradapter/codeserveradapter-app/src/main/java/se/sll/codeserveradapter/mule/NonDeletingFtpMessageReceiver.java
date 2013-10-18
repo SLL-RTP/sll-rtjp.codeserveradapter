@@ -28,7 +28,12 @@ import org.mule.api.transport.Connector;
 import org.mule.transport.ftp.FtpMessageReceiver;
 
 /**
- * Makes sure remote files are not deleted.
+ * Makes sure remote files are not deleted. <p>
+ * 
+ * The default receiver deletes remote files upon successful completion. 
+ * The remote file deletion part has been removed 
+ * in the overridden {@link #postProcess(FTPClient, FTPFile, MuleMessage)} method, otherwise
+ * it's kept as is.
  * 
  * @author Peter
  */
