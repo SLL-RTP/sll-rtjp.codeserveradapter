@@ -77,19 +77,16 @@ public class ListPaymentResponsibleProducer implements ListPaymentResponsibleDat
             final ListPaymentResponsibleDataRequest request) {
 
         final ListPaymentResponsibleDataResponseType response = new ListPaymentResponsibleDataResponseType();
-        final ListPaymentResponsibleDataResponse data = new ListPaymentResponsibleDataResponse();
 
         final ResultCode rc = new ResultCode();
         response.setResultCode(rc);
 
+        final ListPaymentResponsibleDataResponse data = new ListPaymentResponsibleDataResponse();
         data.setHsaId(request.getHsaId());
         data.setServiceCode(request.getServiceCode());
 
-        final Date eventTime = toDate(request.getEventTime());
 
         final Map<String, List<TermItem<HSAMappingState>>> index = HSAMappingService.getInstance().getCurrentIndex();
-        final Map<String, Commission> map = new HashMap<String, Commission>();
-
         final List<TermItem<HSAMappingState>> hsaMappingTerms = index.get(request.getHsaId());
 
         if (hsaMappingTerms == null) {
@@ -98,6 +95,8 @@ public class ListPaymentResponsibleProducer implements ListPaymentResponsibleDat
             return response;
         }
 
+        final Date eventTime = toDate(request.getEventTime());
+        final Map<String, Commission> map = new HashMap<String, Commission>();
 
         for (TermItem<HSAMappingState> hsaMappingTerm : hsaMappingTerms) {
             for (HSAMappingState mappingState : hsaMappingTerm.getStateVector()) {
