@@ -37,7 +37,9 @@ import se.sll.codeserveradapter.paymentresponsible.model.FacilityState;
 import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
 
 /**
- * Builds HSA Mapping index.
+ * Builds HSA Mapping index. <p>
+ * 
+ * Uses XML parsing utilities to traverse input files.
  * 
  * @author Peter
  */

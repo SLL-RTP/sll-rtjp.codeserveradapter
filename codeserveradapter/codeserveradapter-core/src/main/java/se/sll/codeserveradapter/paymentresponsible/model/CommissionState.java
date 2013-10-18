@@ -20,8 +20,18 @@ import java.io.Serializable;
 import se.sll.codeserveradapter.parser.TermItem;
 import se.sll.codeserveradapter.parser.TermState;
 
+/**
+ * Commission state.
+ * 
+ * @author Peter
+ *
+ */
 public class CommissionState extends TermState implements Serializable {
     private static final long serialVersionUID = 1L;
+    /**
+     * The type.
+     * @serial
+     */
     private TermItem<CommissionTypeState> commissionType;
 
     public TermItem<CommissionTypeState> getCommissionType() {

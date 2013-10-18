@@ -35,6 +35,19 @@ import se.sll.codeserveradapter.parser.TermItem;
 import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
 import se.sll.codeserveradapter.paymentresponsible.util.HSAMappingIndexBuilder;
 
+/**
+ * Manages the main index mapping HSA IDs to Commissions, and corresponding Payment Responsible. <p>
+ * 
+ * The index is built from code-server master XML files, and a the result is saved/cached on local disk.
+ * The local cache is always used if it exists, and the only way to rebuild the index is to 
+ * invoke the <code>revalidate</code> method, which is intended to be called by an external scheduled
+ * job.
+ * 
+ * @see #revalidate()
+ * 
+ * @author Peter
+ *
+ */
 @Service
 public class HSAMappingService {
 
@@ -86,14 +99,25 @@ public class HSAMappingService {
         return index;
     }
 
+    /**
+     * Returns if index build process is active.
+     * 
+     * @return true if the index is under construction, otherwise false.
+     */
     public boolean isBusy() {
         return busy;
     }
 
-    public void setBusy(boolean busy) {
+    protected void setBusy(boolean busy) {
         this.busy = busy;
     }
 
+    /**
+     * Rebuilds the index form XML source. <p>
+     * 
+     * Can only be invoked once, i.e. if a rebuild process is ongoing
+     * this method returns without doing anything.
+     */
     public void revalidate() {
         if (isBusy()) {
             return;
@@ -149,9 +173,23 @@ public class HSAMappingService {
         } catch (IOException e) {}
     }
 
+    /**
+     * Returns the singleton instance. <p>
+     * 
+     * Note: This is a work-around, since the parent mule-app doesn't use spring annotations
+     * as configuration mechanism.
+     * 
+     * @return the singleton instance, or null if none has been created.
+     */
     public static HSAMappingService getInstance() {
         return instance;
     }
+    
+    /**
+     * Returns the current index, or null if none exists.
+     * 
+     * @return the current index.
+     */
 
     public synchronized Map<String, List<TermItem<HSAMappingState>>> getCurrentIndex() {
         if (currentIndex == null) {
@@ -161,7 +199,12 @@ public class HSAMappingService {
         return this.currentIndex;
     }
 
-    public synchronized void setCurrentIndex(Map<String, List<TermItem<HSAMappingState>>> currentIndex) {
+    /**
+     * Updates the current index.
+     * 
+     * @param currentIndex the new index.
+     */
+    protected synchronized void setCurrentIndex(Map<String, List<TermItem<HSAMappingState>>> currentIndex) {
         this.currentIndex = currentIndex;
     }
 }

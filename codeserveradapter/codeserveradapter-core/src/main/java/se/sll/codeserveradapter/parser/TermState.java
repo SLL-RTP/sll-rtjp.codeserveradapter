@@ -43,9 +43,20 @@ public abstract class TermState implements Comparable<TermState>, Serializable {
         }
     }
 
+    /**
+     * The name.
+     * @serial
+     */
     private String name;
-    
+    /**
+     * Valid from date and time.
+     * @serial
+     */
     private Date validFrom = MIN_DATE;
+    /**
+     * Valid to date and time.
+     * @serial
+     */
     private Date validTo = MAX_DATE;
 
     public String getName() {

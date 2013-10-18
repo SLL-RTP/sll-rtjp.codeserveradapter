@@ -29,7 +29,15 @@ import java.util.List;
  */
 public class TermItem<T extends TermState> implements Serializable {
     private static final long serialVersionUID = 1L;
+    /**
+     * The unique id for this kind of state.
+     * @serial
+     */
     private String id;
+    /**
+     * The time series of state.
+     * @serial
+     */
     private List<T> stateVector = new ArrayList<T>();
     
     public String getId() {

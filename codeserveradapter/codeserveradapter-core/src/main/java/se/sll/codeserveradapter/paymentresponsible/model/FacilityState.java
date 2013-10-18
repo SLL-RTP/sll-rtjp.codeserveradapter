@@ -22,8 +22,18 @@ import java.util.List;
 import se.sll.codeserveradapter.parser.TermItem;
 import se.sll.codeserveradapter.parser.TermState;
 
+/**
+ * Facility state. The id corresponds to "kombikaid"
+ * 
+ * @author Peter
+ *
+ */
 public class FacilityState extends TermState implements Serializable {
     private static final long serialVersionUID = 1L;
+    /**
+     * The list of commissions.
+     * @serial
+     */
     private List<TermItem<CommissionState>> commissions = new ArrayList<TermItem<CommissionState>>();
 
 

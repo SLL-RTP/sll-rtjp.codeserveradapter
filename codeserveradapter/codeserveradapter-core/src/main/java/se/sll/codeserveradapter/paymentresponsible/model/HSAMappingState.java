@@ -20,8 +20,18 @@ import java.io.Serializable;
 import se.sll.codeserveradapter.parser.TermItem;
 import se.sll.codeserveradapter.parser.TermState;
 
+/**
+ * HSA Mapping from HSA ID to facilities. The id id corresponds to HSA ID.
+ * 
+ * @author Peter
+ *
+ */
 public class HSAMappingState extends TermState implements Serializable {
     private static final long serialVersionUID = 1L;
+    /**
+     * The facility.
+     * @serial
+     */
     private TermItem<FacilityState> facility;
 
     public TermItem<FacilityState> getFacility() {

@@ -41,6 +41,7 @@ import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
 import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
 /**
+ * Implements the payment responsible Web Service.
  * 
  * @author Peter
  *
