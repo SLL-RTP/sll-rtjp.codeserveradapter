@@ -91,50 +91,71 @@ public class ListPaymentResponsibleProducer implements ListPaymentResponsibleDat
         final Map<String, Commission> map = new HashMap<String, Commission>();
 
         final List<TermItem<HSAMappingState>> hsaMappingTerms = index.get(request.getHsaId());
-        if (hsaMappingTerms != null) {
-            for (TermItem<HSAMappingState> hsaMappingTerm : hsaMappingTerms) {
-                for (HSAMappingState mappingState : hsaMappingTerm.getStateVector()) {
-                    final FacilityState facilityState = mappingState.getFacility().getState(eventTime);
-                    if (facilityState == null) {
-                        continue;
-                    }
-                    for (TermItem<CommissionState> commissionTerm : facilityState.getCommissions()) {
-                        final CommissionState commissionState = commissionTerm.getState(eventTime);
-                        if (commissionState == null) {
-                            continue;
-                        }
-                        final Commission commission = new Commission();
-                        commission.setId(commissionTerm.getId());
-                        commission.setType(commissionState.getCommissionType().getState(eventTime).getName());
-                        commission.setValidFrom(toTime(commissionState.getValidFrom()));
-                        commission.setValidTo(toTime(commissionState.getValidTo()));
-                        commission.setKombikaId(mappingState.getFacility().getId());
-                        commission.setName(commissionState.getName());
-                        final Commission prev = map.get(commission.getId());
-                        if (prev != null) {
-                            prev.setKombikaId(prev.getKombikaId() + "," + mappingState.getFacility().getId());
-                        } else {
-                            map.put(commission.getId(), commission);
-                        }
-                    }
-                }
-            }
-            data.getCommissionList().addAll(map.values());
 
-            // sort stuff in time order
-            Collections.sort(data.getCommissionList(), new Comparator<Commission>() {
-                @Override
-                public int compare(Commission left, Commission right) {
-                    return left.getValidFrom().compare(right.getValidFrom());
-                }
-            });
-            response.setPaymentResponsibleData(data);
-            rc.setCode(ResultCodeEnumType.OK);
-        } else {
+        if (hsaMappingTerms == null) {
             rc.setCode(ResultCodeEnumType.ERROR);
             rc.setComment("No such HSA ID found: " + request.getHsaId());
+            return response;
         }
 
+
+        for (TermItem<HSAMappingState> hsaMappingTerm : hsaMappingTerms) {
+            for (HSAMappingState mappingState : hsaMappingTerm.getStateVector()) {
+                final FacilityState facilityState = mappingState.getFacility().getState(eventTime);
+                processFacility(facilityState, mappingState.getFacility().getId(), eventTime, map);
+            }
+        }
+
+        data.getCommissionList().addAll(map.values());
+
+        // sort stuff in time order
+        Collections.sort(data.getCommissionList(), new Comparator<Commission>() {
+            @Override
+            public int compare(Commission left, Commission right) {
+                return left.getValidFrom().compare(right.getValidFrom());
+            }
+        });
+
+        response.setPaymentResponsibleData(data);
+        rc.setCode(ResultCodeEnumType.OK);
         return response;
+    }
+
+    //
+    static void processFacility(final FacilityState facilityState, 
+            final String kombikaId, 
+            final Date eventTime,  
+            final Map<String, Commission> map) {
+
+        if (facilityState == null) {
+            return;
+        }
+        for (TermItem<CommissionState> commissionTerm : facilityState.getCommissions()) {
+            final Commission commission = createCommission(commissionTerm, eventTime);
+            if (commission != null) {
+                commission.setKombikaId(kombikaId);
+                final Commission prev = map.get(commission.getId());
+                if (prev != null) {
+                    prev.setKombikaId(prev.getKombikaId() + "," + kombikaId);
+                } else {
+                    map.put(commission.getId(), commission);
+                }
+            }
+        }
+    }
+
+    //
+    static Commission createCommission(TermItem<CommissionState> commissionTerm, Date eventTime) {
+        final CommissionState commissionState = commissionTerm.getState(eventTime);
+        if (commissionState == null) {
+            return null;
+        }
+        final Commission commission = new Commission();
+        commission.setId(commissionTerm.getId());
+        commission.setType(commissionState.getCommissionType().getState(eventTime).getName());
+        commission.setValidFrom(toTime(commissionState.getValidFrom()));
+        commission.setValidTo(toTime(commissionState.getValidTo()));
+        commission.setName(commissionState.getName());
+        return commission;
     }
 }
