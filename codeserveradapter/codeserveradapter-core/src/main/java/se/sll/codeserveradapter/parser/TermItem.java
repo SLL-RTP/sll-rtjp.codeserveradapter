@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * 
- * Entity uniquely identified by an id, but with a state that varys over time.
+ * Entity uniquely identified by an id, but with a state that vary over time.
  * 
  * @author Peter
  *
@@ -64,7 +64,7 @@ public class TermItem<T extends TermState> implements Serializable {
      */
     public T getState(final Date date) {
         for (final T state : stateVector) {
-            if (state.getValidFrom().before(date) && state.getValidTo().after(date)) {
+            if (state.isValid(date)) {
                 return state;
             }
         }

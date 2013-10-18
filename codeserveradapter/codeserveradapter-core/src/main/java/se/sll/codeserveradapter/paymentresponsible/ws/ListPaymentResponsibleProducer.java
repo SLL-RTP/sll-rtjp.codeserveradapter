@@ -85,7 +85,7 @@ public class ListPaymentResponsibleProducer implements ListPaymentResponsibleDat
         data.setHsaId(request.getHsaId());
         data.setServiceCode(request.getServiceCode());
 
-        Date eventTime = toDate(request.getEventTime());
+        final Date eventTime = toDate(request.getEventTime());
 
         final Map<String, List<TermItem<HSAMappingState>>> index = HSAMappingService.getInstance().getCurrentIndex();
         final Map<String, Commission> map = new HashMap<String, Commission>();
