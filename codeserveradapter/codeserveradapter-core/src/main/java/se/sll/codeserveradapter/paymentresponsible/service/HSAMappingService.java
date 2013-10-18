@@ -31,7 +31,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingBean;
+import se.sll.codeserveradapter.parser.TermItem;
+import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
 import se.sll.codeserveradapter.paymentresponsible.util.HSAMappingIndexBuilder;
 
 @Service
@@ -60,7 +61,7 @@ public class HSAMappingService {
     private static final Logger log = LoggerFactory.getLogger(HSAMappingService.class);
 
 
-    private Map<String, List<HSAMappingBean>> currentIndex;
+    private Map<String, List<TermItem<HSAMappingState>>> currentIndex;
     private final Object buildLock = new Object();
 
     public HSAMappingService() {
@@ -73,14 +74,14 @@ public class HSAMappingService {
         return localPath + (localPath.endsWith("/") ? "" : "/") + name;
     }
 
-    private Map<String, List<HSAMappingBean>> build() {
+    private Map<String, List<TermItem<HSAMappingState>>> build() {
         HSAMappingIndexBuilder builder = new HSAMappingIndexBuilder()
         .withCommissionFile(path(commissionFile))
         .withCommissionTypeFile(path(commissionTypeFile))
         .withFacilityFile(path(facilityFile))
         .withMekFile(path(mekFile));
 
-        final Map<String, List<HSAMappingBean>> index = builder.build();
+        final Map<String, List<TermItem<HSAMappingState>>> index = builder.build();
 
         return index;
     }
@@ -103,7 +104,7 @@ public class HSAMappingService {
             }
             setBusy(true);
             try {
-                final Map<String, List<HSAMappingBean>> index = build();
+                final Map<String, List<TermItem<HSAMappingState>>> index = build();
                 save(index);
                 setCurrentIndex(index);
             } finally {
@@ -152,15 +153,15 @@ public class HSAMappingService {
         return instance;
     }
 
-    public synchronized Map<String, List<HSAMappingBean>> getCurrentIndex() {
+    public synchronized Map<String, List<TermItem<HSAMappingState>>> getCurrentIndex() {
         if (currentIndex == null) {
-            Map<String, List<HSAMappingBean>> index = read();
+            Map<String, List<TermItem<HSAMappingState>>> index = read();
             setCurrentIndex(index);
         }
         return this.currentIndex;
     }
 
-    public synchronized void setCurrentIndex(Map<String, List<HSAMappingBean>> currentIndex) {
+    public synchronized void setCurrentIndex(Map<String, List<TermItem<HSAMappingState>>> currentIndex) {
         this.currentIndex = currentIndex;
     }
 }

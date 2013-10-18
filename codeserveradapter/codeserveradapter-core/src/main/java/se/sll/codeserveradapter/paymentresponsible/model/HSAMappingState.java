@@ -17,27 +17,18 @@ package se.sll.codeserveradapter.paymentresponsible.model;
 
 import java.io.Serializable;
 
-import se.sll.codeserveradapter.parser.AbstractTermItem;
-import se.sll.codeserveradapter.parser.State;
+import se.sll.codeserveradapter.parser.TermItem;
+import se.sll.codeserveradapter.parser.TermState;
 
-
-/**
- * 
- * @author Peter
- *
- */
-public class CommissionBean extends AbstractTermItem<CommissionBean.CommissionState> implements Serializable {
+public class HSAMappingState extends TermState implements Serializable {
     private static final long serialVersionUID = 1L;
-    
-    public static class CommissionState extends State implements Serializable {
-        private static final long serialVersionUID = 1L;
-        private CommissionTypeBean commissionType;
+    private TermItem<FacilityState> facility;
 
-        public CommissionTypeBean getCommissionType() {
-            return commissionType;
-        }
-        public void setCommissionType(CommissionTypeBean commissionType) {
-            this.commissionType = commissionType;
-        }        
+    public TermItem<FacilityState> getFacility() {
+        return facility;
+    }
+
+    public void setFacility(TermItem<FacilityState> facility) {
+        this.facility = facility;
     }
 }

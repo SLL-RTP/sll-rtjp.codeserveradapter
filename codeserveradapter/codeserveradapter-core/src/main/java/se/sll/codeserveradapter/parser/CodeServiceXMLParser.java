@@ -192,11 +192,11 @@ public class CodeServiceXMLParser {
             switch (e.getEventType()) {
             case XMLEvent.START_ELEMENT:
                 if (same(e.asStartElement(), TERMITEMENTRY)) {
-                    final Date expirationDate = State.toDate(attribute(e.asStartElement(), "expirationdate"));
+                    final Date expirationDate = TermState.toDate(attribute(e.asStartElement(), "expirationdate"));
                     // avoid unnecessary processing, and check time before creating item
                     if (expirationDate.after(newerThan)) {
                         final CodeServiceEntry codeServiceEntry = processCodeServiceEntry(e.asStartElement());
-                        codeServiceEntry.setValidFrom(State.toDate(attribute(e.asStartElement(), "begindate")));
+                        codeServiceEntry.setValidFrom(TermState.toDate(attribute(e.asStartElement(), "begindate")));
                         codeServiceEntry.setValidTo(expirationDate);
                         codeServiceEntryCallback.onCodeServiceEntry(codeServiceEntry);
                     }

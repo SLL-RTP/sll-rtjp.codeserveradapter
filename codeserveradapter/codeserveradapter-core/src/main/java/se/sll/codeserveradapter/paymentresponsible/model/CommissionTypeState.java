@@ -17,24 +17,8 @@ package se.sll.codeserveradapter.paymentresponsible.model;
 
 import java.io.Serializable;
 
-import se.sll.codeserveradapter.parser.AbstractTermItem;
-import se.sll.codeserveradapter.parser.State;
+import se.sll.codeserveradapter.parser.TermState;
 
-
-public class HSAMappingBean extends AbstractTermItem<HSAMappingBean.HSAMappingState> implements Serializable {
+public class CommissionTypeState extends TermState implements Serializable {
     private static final long serialVersionUID = 1L;
-    
-    public static class HSAMappingState extends State implements Serializable {
-        private static final long serialVersionUID = 1L;
-        private FacilityBean facility;
-
-        public FacilityBean getFacility() {
-            return facility;
-        }
-
-        public void setFacility(FacilityBean facility) {
-            this.facility = facility;
-        }
-    }
-
 }

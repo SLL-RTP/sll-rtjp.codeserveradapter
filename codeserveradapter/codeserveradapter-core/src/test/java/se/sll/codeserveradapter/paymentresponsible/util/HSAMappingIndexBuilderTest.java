@@ -25,7 +25,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import se.sll.codeserveradapter.TestSupport;
-import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingBean;
+import se.sll.codeserveradapter.parser.TermItem;
+import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
 import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
 public class HSAMappingIndexBuilderTest extends TestSupport {
@@ -36,13 +37,13 @@ public class HSAMappingIndexBuilderTest extends TestSupport {
     @Test
     public void parse_success() {
         hsaMappingService.revalidate();
-        final Map<String, List<HSAMappingBean>> index = hsaMappingService.getCurrentIndex();
+        final Map<String, List<TermItem<HSAMappingState>>> index = hsaMappingService.getCurrentIndex();
       
-        assertTrue(index.size() > 4000);
+        assertTrue(index.size() == 1);
         
-        for (List<HSAMappingBean> list : index.values()) {
+        for (List<TermItem<HSAMappingState>> list : index.values()) {
             assertFalse(list.size() == 0);
-            for (HSAMappingBean mapping : list) {
+            for (TermItem<HSAMappingState> mapping : list) {
                 assertTrue(mapping.getStateVector().size() > 0);
             }
         }

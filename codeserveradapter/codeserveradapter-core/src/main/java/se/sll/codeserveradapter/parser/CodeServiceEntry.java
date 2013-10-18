@@ -23,15 +23,19 @@ import java.util.Map;
 
 /**
  * 
+ * Holds entry state for a code server entry during XML parsing.
+ * 
  * @author Peter
  *
  */
-public class CodeServiceEntry extends State implements Serializable {
+public class CodeServiceEntry extends TermState implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String id;
     private Map<String, String> attributes = new HashMap<String, String>();
     private Map<String, List<String>> codes = new HashMap<String, List<String>>();
+    
+    
     public String getId() {
         return id;
     }

@@ -17,15 +17,17 @@ package se.sll.codeserveradapter.paymentresponsible.model;
 
 import java.io.Serializable;
 
-import se.sll.codeserveradapter.parser.AbstractTermItem;
-import se.sll.codeserveradapter.parser.State;
+import se.sll.codeserveradapter.parser.TermItem;
+import se.sll.codeserveradapter.parser.TermState;
 
-
-public class CommissionTypeBean extends AbstractTermItem<CommissionTypeBean.CommissionTypeState> implements Serializable {
+public class CommissionState extends TermState implements Serializable {
     private static final long serialVersionUID = 1L;
-    
-    public static class CommissionTypeState extends State implements Serializable {
-        private static final long serialVersionUID = 1L;
-        
+    private TermItem<CommissionTypeState> commissionType;
+
+    public TermItem<CommissionTypeState> getCommissionType() {
+        return commissionType;
     }
+    public void setCommissionType(TermItem<CommissionTypeState> commissionType) {
+        this.commissionType = commissionType;
+    }        
 }

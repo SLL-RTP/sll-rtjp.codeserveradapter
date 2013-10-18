@@ -15,16 +15,20 @@
  */
 package se.sll.codeserveradapter.parser;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 /**
  * 
+ * Entity uniquely identified by an id, but with a state that varys over time.
+ * 
  * @author Peter
  *
  */
-public class AbstractTermItem<T extends State> {
+public class TermItem<T extends TermState> implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String id;
     private List<T> stateVector = new ArrayList<T>();
     
@@ -40,10 +44,16 @@ public class AbstractTermItem<T extends State> {
         return stateVector;
     }
     
-    public void addState(final T state) {
-        stateVector.add(state);
+    public void addState(final T termState) {
+        stateVector.add(termState);
     }
     
+    /**
+     * Returns state valid for a specific date and time.
+     * 
+     * @param date the date and time.
+     * @return the state or null if none found.
+     */
     public T getState(final Date date) {
         for (final T state : stateVector) {
             if (state.getValidFrom().before(date) && state.getValidTo().after(date)) {
@@ -64,8 +74,8 @@ public class AbstractTermItem<T extends State> {
         if (this == another) {
             return true;
         }
-        if (another instanceof AbstractTermItem) { 
-            return getId().equals(((AbstractTermItem<?>)another).getId());
+        if (another instanceof TermItem) { 
+            return getId().equals(((TermItem<?>)another).getId());
         }
         return false;
     }

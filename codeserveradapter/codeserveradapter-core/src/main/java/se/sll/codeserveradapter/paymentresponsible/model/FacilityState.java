@@ -19,29 +19,19 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import se.sll.codeserveradapter.parser.AbstractTermItem;
-import se.sll.codeserveradapter.parser.State;
+import se.sll.codeserveradapter.parser.TermItem;
+import se.sll.codeserveradapter.parser.TermState;
 
-
-/**
- * 
- * @author Peter
- *
- */
-public class FacilityBean extends AbstractTermItem<FacilityBean.FacilityState>  implements Serializable {
+public class FacilityState extends TermState implements Serializable {
     private static final long serialVersionUID = 1L;
-    
-    public static class FacilityState extends State implements Serializable {
-        private static final long serialVersionUID = 1L;
-        private List<CommissionBean> commissions = new ArrayList<CommissionBean>();
+    private List<TermItem<CommissionState>> commissions = new ArrayList<TermItem<CommissionState>>();
 
 
-        public List<CommissionBean> getCommissions() {
-            return commissions;
-        }
-
-        public void setCommissions(List<CommissionBean> commissions) {
-            this.commissions = commissions;
-        }        
+    public List<TermItem<CommissionState>> getCommissions() {
+        return commissions;
     }
+
+    public void setCommissions(List<TermItem<CommissionState>> commissions) {
+        this.commissions = commissions;
+    }        
 }

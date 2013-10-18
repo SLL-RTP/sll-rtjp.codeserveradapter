@@ -29,11 +29,12 @@ import se.sll.codeserveradapter.parser.CodeServiceXMLParser;
 import se.sll.codeserveradapter.parser.CodeServiceXMLParser.CodeServiceEntryCallback;
 import se.sll.codeserveradapter.parser.SimpleXMLElementParser;
 import se.sll.codeserveradapter.parser.SimpleXMLElementParser.ElementMatcherCallback;
-import se.sll.codeserveradapter.parser.State;
-import se.sll.codeserveradapter.paymentresponsible.model.CommissionBean;
-import se.sll.codeserveradapter.paymentresponsible.model.CommissionTypeBean;
-import se.sll.codeserveradapter.paymentresponsible.model.FacilityBean;
-import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingBean;
+import se.sll.codeserveradapter.parser.TermItem;
+import se.sll.codeserveradapter.parser.TermState;
+import se.sll.codeserveradapter.paymentresponsible.model.CommissionState;
+import se.sll.codeserveradapter.paymentresponsible.model.CommissionTypeState;
+import se.sll.codeserveradapter.paymentresponsible.model.FacilityState;
+import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
 
 /**
  * Builds HSA Mapping index.
@@ -117,30 +118,30 @@ public class HSAMappingIndexBuilder {
      * 
      * @return a map with HSA ID as keys and {@link HSAMappingBean} as value objects.
      */
-    public Map<String, List<HSAMappingBean>> build() {
+    public Map<String, List<TermItem<HSAMappingState>>> build() {
         log.info("build commissionTypeIndex from: {}", commissionTypeFile);
-        final HashMap<String, CommissionTypeBean> commissionTypeIndex = createCommissionTypeIndex();
+        final HashMap<String, TermItem<CommissionTypeState>> commissionTypeIndex = createCommissionTypeIndex();
         log.info("commissionTypeIndex size: {}", commissionTypeIndex.size());
 
         log.info("build commissionIndex from: {}", commissionFile);
-        final HashMap<String, CommissionBean> commissionIndex = createCommissionIndex(commissionTypeIndex);
+        final HashMap<String, TermItem<CommissionState>> commissionIndex = createCommissionIndex(commissionTypeIndex);
         log.info("commissionIndex size: {}", commissionIndex.size());
 
         log.info("build facilityIndex from: {}", facilityFIle);
-        final HashMap<String, FacilityBean> facilityIndex = createFacilityIndex(commissionIndex);
+        final HashMap<String, TermItem<FacilityState>> facilityIndex = createFacilityIndex(commissionIndex);
         log.info("facilityIndex size: {}", facilityIndex.size());
 
         log.info("build hsaMappingIndex from: {}", mekFile);
-        final Map<String, List<HSAMappingBean>> hsaIndex = createHSAIndex(facilityIndex);
+        final Map<String, List<TermItem<HSAMappingState>>> hsaIndex = createHSAIndex(facilityIndex);
         log.info("hsaMappingIndex size: {}", hsaIndex.size());
 
         return hsaIndex;
     }
 
     //
-    protected Map<String, List<HSAMappingBean>> createHSAIndex(final HashMap<String, FacilityBean> avdIndex) {
+    protected Map<String, List<TermItem<HSAMappingState>>> createHSAIndex(final HashMap<String, TermItem<FacilityState>> avdIndex) {
         SimpleXMLElementParser elementParser = new SimpleXMLElementParser(this.mekFile);
-        final Map<String, List<HSAMappingBean>> map = new HashMap<String, List<HSAMappingBean>>();
+        final Map<String, List<TermItem<HSAMappingState>>> map = new HashMap<String, List<TermItem<HSAMappingState>>>();
 
         final Map<String, Integer> elements = new HashMap<String, Integer>();
         elements.put("Kombikakod", 1);
@@ -150,8 +151,8 @@ public class HSAMappingIndexBuilder {
 
 
         elementParser.parse("mappning", elements, new ElementMatcherCallback() {
-            private HSAMappingBean mapping = null;
-            private HSAMappingBean.HSAMappingState state = null;
+            private TermItem<HSAMappingState> mapping = null;
+            private HSAMappingState state = null;
             @Override
             public void match(int element, String data) {
                 switch (element) {
@@ -162,10 +163,10 @@ public class HSAMappingIndexBuilder {
                     mapping.setId(data);
                     break;
                 case 3:
-                    state.setValidFrom(State.toDate(data));
+                    state.setValidFrom(TermState.toDate(data));
                     break;
                 case 4:
-                    state.setValidTo(State.toDate(data));
+                    state.setValidTo(TermState.toDate(data));
                     break;
                 }
             }
@@ -173,9 +174,9 @@ public class HSAMappingIndexBuilder {
             @Override
             public void end() {
                 if (state.isNewerThan(newerThan) && state.getFacility() != null) {
-                    List<HSAMappingBean> list = map.get(mapping.getId());
+                    List<TermItem<HSAMappingState>> list = map.get(mapping.getId());
                     if (list == null) {
-                        list = new ArrayList<HSAMappingBean>();
+                        list = new ArrayList<TermItem<HSAMappingState>>();
                         map.put(mapping.getId(), list);
                     }
                     mapping.addState(state);
@@ -185,8 +186,8 @@ public class HSAMappingIndexBuilder {
 
             @Override
             public void begin() {
-                state = new HSAMappingBean.HSAMappingState();
-                mapping = new HSAMappingBean();
+                state = new HSAMappingState();
+                mapping = new TermItem<HSAMappingState>();
             }
         });
 
@@ -195,8 +196,8 @@ public class HSAMappingIndexBuilder {
 
 
     //
-    protected HashMap<String, FacilityBean> createFacilityIndex(final HashMap<String, CommissionBean> samverksIndex) {
-        final HashMap<String, FacilityBean> index = new HashMap<String, FacilityBean>();
+    protected HashMap<String, TermItem<FacilityState>> createFacilityIndex(final HashMap<String, TermItem<CommissionState>> samverksIndex) {
+        final HashMap<String, TermItem<FacilityState>> index = new HashMap<String, TermItem<FacilityState>>();
 
         CodeServiceXMLParser parser = new CodeServiceXMLParser(this.facilityFIle, new CodeServiceEntryCallback() {
             @Override
@@ -207,18 +208,18 @@ public class HSAMappingIndexBuilder {
                     if (codes.size() == 1 && NO_COMMISSION_ID.equals(codes.get(0))) {
                         return;
                     }
-                    FacilityBean avd = index.get(codeServiceEntry.getId());
+                    TermItem<FacilityState> avd = index.get(codeServiceEntry.getId());
                     if (avd == null) {
-                        avd = new FacilityBean();
+                        avd = new TermItem<FacilityState>();
                         avd.setId(codeServiceEntry.getId());
                         index.put(codeServiceEntry.getId(), avd);
                     }
-                    final FacilityBean.FacilityState state = new FacilityBean.FacilityState();
+                    final FacilityState state = new FacilityState();
                     state.setName(codeServiceEntry.getAttribute(SHORTNAME));
                     state.setValidFrom(codeServiceEntry.getValidFrom());
                     state.setValidTo(codeServiceEntry.getValidTo());
                     for (final String id : codes) {
-                        final CommissionBean samverks = samverksIndex.get(id);
+                        final TermItem<CommissionState> samverks = samverksIndex.get(id);
                         // don't add the same twice
                         if (samverks != null) {
                             state.getCommissions().add(samverks);
@@ -239,13 +240,13 @@ public class HSAMappingIndexBuilder {
     }
 
     //
-    protected HashMap<String, CommissionBean> createCommissionIndex(final HashMap<String, CommissionTypeBean> uppdragstypIndex) {
-        final HashMap<String, CommissionBean> index = new HashMap<String, CommissionBean>();
+    protected HashMap<String, TermItem<CommissionState>> createCommissionIndex(final HashMap<String, TermItem<CommissionTypeState>> uppdragstypIndex) {
+        final HashMap<String, TermItem<CommissionState>> index = new HashMap<String, TermItem<CommissionState>>();
 
         CodeServiceXMLParser parser = new CodeServiceXMLParser(this.commissionFile, new CodeServiceEntryCallback() {
             @Override
             public void onCodeServiceEntry(CodeServiceEntry codeServiceEntry) {
-                CommissionTypeBean uppdragstyp = null;
+                TermItem<CommissionTypeState> uppdragstyp = null;
                 List<String> ul = codeServiceEntry.getCodes(UPPDRAGSTYP);
                 if (ul != null && ul.size() == 1) {
                     uppdragstyp = uppdragstypIndex.get(ul.get(0));
@@ -253,13 +254,13 @@ public class HSAMappingIndexBuilder {
                 if (uppdragstyp == null) {
                     return;
                 }
-                CommissionBean commission = index.get(codeServiceEntry.getId());
+                TermItem<CommissionState> commission = index.get(codeServiceEntry.getId());
                 if (commission == null) {
-                    commission = new CommissionBean();
+                    commission = new TermItem<CommissionState>();
                     commission.setId(codeServiceEntry.getId());
                     index.put(codeServiceEntry.getId(), commission);
                 }
-                final CommissionBean.CommissionState state = new CommissionBean.CommissionState();
+                final CommissionState state = new CommissionState();
                 state.setName(codeServiceEntry.getAttribute(ABBREVIATION));
                 state.setCommissionType(uppdragstyp);
                 state.setValidFrom(codeServiceEntry.getValidFrom());
@@ -278,19 +279,19 @@ public class HSAMappingIndexBuilder {
     }
 
     //
-    protected HashMap<String, CommissionTypeBean> createCommissionTypeIndex() {
-        final HashMap<String, CommissionTypeBean> index = new HashMap<String, CommissionTypeBean>();
+    protected HashMap<String, TermItem<CommissionTypeState>> createCommissionTypeIndex() {
+        final HashMap<String, TermItem<CommissionTypeState>> index = new HashMap<String, TermItem<CommissionTypeState>>();
 
         CodeServiceXMLParser parser = new CodeServiceXMLParser(this.commissionTypeFile, new CodeServiceEntryCallback() {
             @Override
             public void onCodeServiceEntry(CodeServiceEntry codeServiceEntry) {
-                CommissionTypeBean commissionType = index.get(codeServiceEntry.getId());
+                TermItem<CommissionTypeState> commissionType = index.get(codeServiceEntry.getId());
                 if (commissionType == null) {
-                    commissionType = new CommissionTypeBean();
+                    commissionType = new TermItem<CommissionTypeState>();
                     commissionType.setId(codeServiceEntry.getId());
                     index.put(codeServiceEntry.getId(), commissionType);
                 }
-                final CommissionTypeBean.CommissionTypeState state = new CommissionTypeBean.CommissionTypeState();
+                final CommissionTypeState state = new CommissionTypeState();
                 state.setName(codeServiceEntry.getAttribute(SHORTNAME));
                 state.setValidFrom(codeServiceEntry.getValidFrom());
                 state.setValidTo(codeServiceEntry.getValidTo());

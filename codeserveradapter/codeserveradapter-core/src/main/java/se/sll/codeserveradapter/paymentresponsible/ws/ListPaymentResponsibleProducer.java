@@ -34,9 +34,10 @@ import riv.sll.paymentresponsible.listpaymentresponsibledata._1.rivtabp21.ListPa
 import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataRequest;
 import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataResponse;
 import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataResponseType;
-import se.sll.codeserveradapter.paymentresponsible.model.CommissionBean;
-import se.sll.codeserveradapter.paymentresponsible.model.FacilityBean;
-import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingBean;
+import se.sll.codeserveradapter.parser.TermItem;
+import se.sll.codeserveradapter.paymentresponsible.model.CommissionState;
+import se.sll.codeserveradapter.paymentresponsible.model.FacilityState;
+import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
 import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
 /**
@@ -85,24 +86,24 @@ public class ListPaymentResponsibleProducer implements ListPaymentResponsibleDat
 
         Date eventTime = toDate(request.getEventTime());
 
-        final Map<String, List<HSAMappingBean>> index = HSAMappingService.getInstance().getCurrentIndex();
+        final Map<String, List<TermItem<HSAMappingState>>> index = HSAMappingService.getInstance().getCurrentIndex();
         final Map<String, Commission> map = new HashMap<String, Commission>();
 
-        final List<HSAMappingBean> hsaMappingBeans = index.get(request.getHsaId());
-        if (hsaMappingBeans != null) {
-            for (HSAMappingBean hsaMappingBean : hsaMappingBeans) {
-                for (HSAMappingBean.HSAMappingState mappingState : hsaMappingBean.getStateVector()) {
-                    final FacilityBean.FacilityState facilityState = mappingState.getFacility().getState(eventTime);
+        final List<TermItem<HSAMappingState>> hsaMappingTerms = index.get(request.getHsaId());
+        if (hsaMappingTerms != null) {
+            for (TermItem<HSAMappingState> hsaMappingTerm : hsaMappingTerms) {
+                for (HSAMappingState mappingState : hsaMappingTerm.getStateVector()) {
+                    final FacilityState facilityState = mappingState.getFacility().getState(eventTime);
                     if (facilityState == null) {
                         continue;
                     }
-                    for (CommissionBean commissionBean : facilityState.getCommissions()) {
-                        final CommissionBean.CommissionState commissionState = commissionBean.getState(eventTime);
+                    for (TermItem<CommissionState> commissionTerm : facilityState.getCommissions()) {
+                        final CommissionState commissionState = commissionTerm.getState(eventTime);
                         if (commissionState == null) {
                             continue;
                         }
                         final Commission commission = new Commission();
-                        commission.setId(commissionBean.getId());
+                        commission.setId(commissionTerm.getId());
                         commission.setType(commissionState.getCommissionType().getState(eventTime).getName());
                         commission.setValidFrom(toTime(commissionState.getValidFrom()));
                         commission.setValidTo(toTime(commissionState.getValidTo()));
