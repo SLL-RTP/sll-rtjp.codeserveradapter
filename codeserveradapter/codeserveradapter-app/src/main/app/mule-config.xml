@@ -23,9 +23,9 @@
                 http://www.springframework.org/schema/beans    http://www.springframework.org/schema/beans/spring-beans-current.xsd
     ">
 
-	<spring:beans>
-		<spring:import resource="classpath:codeserveradapter-common.xml" />
-		<spring:import resource="classpath:codeserveradapter-core-spring-context.xml" />
-	</spring:beans>
+       <spring:beans>
+                <spring:import resource="codeserveradapter-common.xml" />
+                <spring:import resource="classpath*:/codeserveradapter-core-spring-context.xml" />
+        </spring:beans>
 
 </mule>
