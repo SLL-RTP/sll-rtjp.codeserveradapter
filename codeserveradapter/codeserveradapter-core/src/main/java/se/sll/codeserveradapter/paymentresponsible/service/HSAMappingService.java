@@ -15,16 +15,8 @@
  */
 package se.sll.codeserveradapter.paymentresponsible.service;
 
-import java.io.Closeable;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import se.sll.codeserveradapter.parser.TermItem;
 import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
+import se.sll.codeserveradapter.paymentresponsible.util.FileObjectStore;
 import se.sll.codeserveradapter.paymentresponsible.util.HSAMappingIndexBuilder;
 
 /**
@@ -76,8 +69,10 @@ public class HSAMappingService {
 
     private Map<String, List<TermItem<HSAMappingState>>> currentIndex;
     private final Object buildLock = new Object();
+    private FileObjectStore fileObjectStore = new FileObjectStore();
 
     public HSAMappingService() {
+        log.debug("constructor");
         if (instance == null) {
             instance = this;
         }
@@ -88,6 +83,8 @@ public class HSAMappingService {
     }
 
     private Map<String, List<TermItem<HSAMappingState>>> build() {
+        log.debug("build index");
+
         HSAMappingIndexBuilder builder = new HSAMappingIndexBuilder()
         .withCommissionFile(path(commissionFile))
         .withCommissionTypeFile(path(commissionTypeFile))
@@ -95,6 +92,8 @@ public class HSAMappingService {
         .withMekFile(path(mekFile));
 
         final Map<String, List<TermItem<HSAMappingState>>> index = builder.build();
+        
+        log.debug("build index: done");
 
         return index;
     }
@@ -119,6 +118,8 @@ public class HSAMappingService {
      * this method returns without doing anything.
      */
     public void revalidate() {
+        log.debug("revalidate index");
+
         if (isBusy()) {
             return;
         }
@@ -129,7 +130,7 @@ public class HSAMappingService {
             setBusy(true);
             try {
                 final Map<String, List<TermItem<HSAMappingState>>> index = build();
-                save(index);
+                fileObjectStore.write(index, fileName);
                 setCurrentIndex(index);
             } finally {
                 setBusy(false);            
@@ -137,41 +138,6 @@ public class HSAMappingService {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> T read() {
-        ObjectInputStream is = null;
-        try {
-            is = new ObjectInputStream(new GZIPInputStream(new FileInputStream(fileName)));
-            return (T) is.readObject();
-        } catch (Exception e) {
-            log.warn(e.toString());
-        } finally {
-            close(is);
-        }
-        return null;            
-    }
-
-    private <T> T save(T index) {
-        ObjectOutputStream os = null;
-        try {
-            os = new ObjectOutputStream(new GZIPOutputStream(new FileOutputStream(fileName)));
-            os.writeObject(index);
-        } catch (Exception e) {
-            log.error("Unable to save HSA index", e);
-        } finally {
-            close(os);
-        }
-        return index;
-    }
-
-    //
-    private void close(Closeable c) {
-        try {
-            if (c != null) {
-                c.close();
-            }
-        } catch (IOException e) {}
-    }
 
     /**
      * Returns the singleton instance. <p>
@@ -193,7 +159,7 @@ public class HSAMappingService {
 
     public synchronized Map<String, List<TermItem<HSAMappingState>>> getCurrentIndex() {
         if (currentIndex == null) {
-            Map<String, List<TermItem<HSAMappingState>>> index = read();
+            Map<String, List<TermItem<HSAMappingState>>> index = fileObjectStore.read(fileName);
             setCurrentIndex(index);
         }
         return this.currentIndex;
