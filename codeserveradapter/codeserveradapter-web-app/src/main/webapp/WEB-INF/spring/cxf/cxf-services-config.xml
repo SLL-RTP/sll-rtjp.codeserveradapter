@@ -44,13 +44,13 @@
 		</jaxws:properties>
 	</jaxws:endpoint>
 
-	<!--  JAXRS
+	<!--  JAXRS -->
 	<jaxrs:server id="admin" address="/admin">
 		<jaxrs:serviceBeans>
-			<ref bean="priceListBean" />
+			<ref bean="adminBean" />
 		</jaxrs:serviceBeans>
 	</jaxrs:server>
 
-	<bean id="priceListBean" class="se.sll.invoicedata.app.rs.impl.PriceListProducerImpl" />
-	-->
+	<bean id="adminBean" class="se.sll.codeserveradapter.paymentresponsible.rs.AdminService" />
+
 </beans>
