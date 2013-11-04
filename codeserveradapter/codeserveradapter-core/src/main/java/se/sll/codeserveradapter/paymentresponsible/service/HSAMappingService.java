@@ -172,5 +172,6 @@ public class HSAMappingService {
      */
     protected synchronized void setCurrentIndex(Map<String, List<TermItem<HSAMappingState>>> currentIndex) {
         this.currentIndex = currentIndex;
+        log.info("current index set, size: {}", this.currentIndex.size());
     }
 }

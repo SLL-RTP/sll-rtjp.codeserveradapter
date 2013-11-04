@@ -27,7 +27,12 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import riv.sll.paymentresponsible._1.Commission;
+import riv.sll.paymentresponsible._1.Contract;
+import riv.sll.paymentresponsible._1.PaymentResponsible;
 import riv.sll.paymentresponsible._1.ResultCode;
 import riv.sll.paymentresponsible._1.ResultCodeEnumType;
 import riv.sll.paymentresponsible.listpaymentresponsibledata._1.rivtabp21.ListPaymentResponsibleDataResponderInterface;
@@ -47,6 +52,8 @@ import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
  *
  */
 public class ListPaymentResponsibleProducer implements ListPaymentResponsibleDataResponderInterface {
+    
+    private static final Logger log = LoggerFactory.getLogger(ListPaymentResponsibleProducer.class);
 
     public static XMLGregorianCalendar toTime(Date date) {
         if (date == null) {
@@ -110,6 +117,8 @@ public class ListPaymentResponsibleProducer implements ListPaymentResponsibleDat
 
         data.getCommissionList().addAll(map.values());
 
+        log.info("comissions found {}", data.getCommissionList().size());
+        
         // sort stuff in time order
         Collections.sort(data.getCommissionList(), new Comparator<Commission>() {
             @Override
@@ -138,6 +147,16 @@ public class ListPaymentResponsibleProducer implements ListPaymentResponsibleDat
                     prev.setKombikaId(prev.getKombikaId() + "," + kombikaId);
                 } else {
                     map.put(commission.getId(), commission);
+                    final PaymentResponsible pr = new PaymentResponsible();
+                    pr.setAddress("Dummy");
+                    pr.setName("HSF");
+                    final Contract contract = new Contract();
+                    contract.setId("N/A");
+                    contract.setName("N/A");
+                    contract.setDescription("N/A");
+                    pr.setContract(contract);
+                    pr.setId("HSF");
+                    commission.setPaymentResponsibleList(Collections.singletonList(pr));
                 }
             }
         }

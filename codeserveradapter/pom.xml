@@ -24,17 +24,19 @@
     <module>codeserveradapter-schemas</module>
     <module>codeserveradapter-core</module>
     <module>codeserveradapter-mule-app</module>
+    <module>codeserveradapter-web-app</module>
   </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <apache.cxf.version>2.5.7</apache.cxf.version>
+    <apache.cxf.version>2.5.1</apache.cxf.version>
     <log4j.version>1.2.14</log4j.version>
     <slf4j.version>1.6.4</slf4j.version>
     <junit.version>4.10</junit.version>
     <commons.lang.version>2.6</commons.lang.version>
     <spring.version>3.1.1.RELEASE</spring.version>
-    <cxf-codegen.version>2.7.7</cxf-codegen.version>
+    <cxf-codegen.version>2.5.1</cxf-codegen.version>
+    <surefire.version>2.16</surefire.version>
   </properties>
 
   <build>
@@ -128,6 +130,11 @@
        </dependency>
        <dependency>
          <groupId>org.springframework</groupId>
+         <artifactId>spring-web</artifactId>
+         <version>${spring.version}</version>
+       </dependency>
+       <dependency>
+         <groupId>org.springframework</groupId>
          <artifactId>spring-context</artifactId>
 	 <version>${spring.version}</version>
 	 <exclusions>
@@ -182,6 +189,34 @@
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
         <version>${commons.lang.version}</version>
+      </dependency>
+      <!-- CXF WS/RS -->
+      <dependency>
+	<groupId>org.apache.cxf</groupId>
+	<artifactId>cxf-rt-frontend-jaxws</artifactId>
+	<version>${apache.cxf.version}</version>
+      </dependency>
+      <dependency>
+	<groupId>org.apache.cxf</groupId>
+	<artifactId>cxf-rt-frontend-jaxrs</artifactId>
+	<version>${apache.cxf.version}</version>
+      </dependency>
+      <dependency>
+	<groupId>org.apache.cxf</groupId>
+	<artifactId>cxf-rt-transports-http</artifactId>
+	<version>${apache.cxf.version}</version>
+	<exclusions>
+          <exclusion>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+          </exclusion>
+	</exclusions>
+      </dependency>
+      <dependency>
+	<groupId>org.apache.cxf</groupId>
+	<artifactId>cxf-rt-transports-http-jetty</artifactId>
+	<version>${apache.cxf.version}</version>
+	<scope>provided</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
