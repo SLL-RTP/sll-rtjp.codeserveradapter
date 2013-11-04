@@ -21,8 +21,9 @@
        <url>https://skltp.googlecode.com/svn/tp/ei/trunk</url> </scm> -->
 
   <modules>
+    <module>codeserveradapter-schemas</module>
     <module>codeserveradapter-core</module>
-    <module>codeserveradapter-app</module>
+    <module>codeserveradapter-mule-app</module>
   </modules>
 
   <properties>
@@ -33,6 +34,7 @@
     <junit.version>4.10</junit.version>
     <commons.lang.version>2.6</commons.lang.version>
     <spring.version>3.1.1.RELEASE</spring.version>
+    <cxf-codegen.version>2.7.7</cxf-codegen.version>
   </properties>
 
   <build>

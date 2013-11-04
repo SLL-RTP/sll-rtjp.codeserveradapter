@@ -1,21 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-
-     Copyright (c) 2013 SLL <http://sll.se/>
-
-       Licensed under the Apache License, Version 2.0 (the "License");
-       you may not use this file except in compliance with the License.
-       You may obtain a copy of the License at
-
-           http://www.apache.org/licenses/LICENSE-2.0
-
-       Unless required by applicable law or agreed to in writing, software
-       distributed under the License is distributed on an "AS IS" BASIS,
-       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-       See the License for the specific language governing permissions and
-       limitations under the License.
-
--->
+<!-- Copyright (c) 2013 SLL <http://sll.se/> Licensed under the Apache License, 
+	Version 2.0 (the "License"); you may not use this file except in compliance 
+	with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 
+	Unless required by applicable law or agreed to in writing, software distributed 
+	under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES 
+	OR CONDITIONS OF ANY KIND, either express or implied. See the License for 
+	the specific language governing permissions and limitations under the License. -->
 <mule xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp" xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:quartz="http://www.mulesoft.org/schema/mule/quartz"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
@@ -27,8 +17,10 @@
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
 
-	<ftp:connector name="ftp-connector" passive="true" streaming="true" binary="true">
-		<service-overrides messageReceiver="se.sll.codeserveradapter.mule.NonDeletingFtpMessageReceiver" />
+	<ftp:connector name="ftp-connector" passive="true"
+		streaming="true" binary="true">
+		<service-overrides
+			messageReceiver="se.sll.codeserveradapter.mule.NonDeletingFtpMessageReceiver" />
 	</ftp:connector>
 
 	<ftp:endpoint name="ftp-fetch" connector-ref="ftp-connector"
@@ -51,7 +43,9 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 	</flow>
 
 	<flow name="ftp-process-fetch-flow">
-		<inbound-endpoint ref="ftp-fetch" />
+		<composite-source>
+			<inbound-endpoint ref="ftp-fetch" />
+		</composite-source>
 		<expression-filter evaluator="header"
 			expression="originalFilename!=null" />
 		<file:outbound-endpoint path="${pr.ftp.localPath}"
