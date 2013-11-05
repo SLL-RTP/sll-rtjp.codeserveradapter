@@ -16,13 +16,11 @@
 package se.sll.codeserveradapter;
 
 import org.junit.runner.RunWith;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="classpath:codeserveradapter-core-spring-context.xml")
-@ActiveProfiles(profiles={"test"}, inheritProfiles=true)
 public abstract class TestSupport {
     
 }

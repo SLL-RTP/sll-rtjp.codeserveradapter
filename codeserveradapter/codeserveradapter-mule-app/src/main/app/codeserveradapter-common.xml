@@ -69,7 +69,7 @@
 				</spring:value>
 				<spring:value>classpath:codeserveradapter-config.properties
 				</spring:value>
-				<spring:value>file://${user.home}/.codeserveradapter-config.properties
+				<spring:value>${user.home}/.codeserveradapter-config.properties
 				</spring:value>
 			</spring:list>
 		</spring:property>

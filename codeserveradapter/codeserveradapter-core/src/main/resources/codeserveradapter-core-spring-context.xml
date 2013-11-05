@@ -24,8 +24,8 @@
 	http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 
 	<context:property-placeholder
-		location="classpath:codeserveradapter-core.properties,file://${user.home}/.codeserveradapter-config.properties"
-		ignore-resource-not-found="false" />
+		location="classpath:codeserveradapter-core.properties,${user.home}/.codeserveradapter-config.properties"
+		ignore-resource-not-found="true" />
 
 	<context:annotation-config />
 
