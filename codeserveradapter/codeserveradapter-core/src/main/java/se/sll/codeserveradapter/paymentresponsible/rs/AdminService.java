@@ -20,16 +20,25 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
+/**
+ * Admin service to trigger revalidation of index data.
+ * 
+ * @author Peter
+ */
 @Path("/")
 public class AdminService {
+    @Autowired
+    private HSAMappingService hsaMappingService;
 
     @GET
     @Produces("application/json")
     @Path("/rebuild-index")
-    public Response  rebuildIndex() {
-        HSAMappingService.getInstance().revalidate();
+    public Response rebuildIndex() {
+        hsaMappingService.revalidate();
         return Response.ok().build();
     }
 }
