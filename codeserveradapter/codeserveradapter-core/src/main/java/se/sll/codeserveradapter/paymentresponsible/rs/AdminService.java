@@ -36,7 +36,7 @@ public class AdminService {
 
     @GET
     @Produces("application/json")
-    @Path("/rebuild-index")
+    @Path("/revalidate-index")
     public Response rebuildIndex() {
         hsaMappingService.revalidate();
         return Response.ok().build();
