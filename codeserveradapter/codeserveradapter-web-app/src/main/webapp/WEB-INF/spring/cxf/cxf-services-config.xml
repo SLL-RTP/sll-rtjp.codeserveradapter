@@ -33,7 +33,7 @@
 	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
 
 	<jaxws:endpoint id="listPaymentResponsible"
-		implementor="se.sll.codeserveradapter.paymentresponsible.ws.ListPaymentResponsibleProducer"
+		implementor="se.sll.codeserveradapter.paymentresponsible.ws.ListPaymentResponsibleWebProducer"
 		address="/ws/listPaymentResponsible">
 		<jaxws:properties>
 			<entry key="schema-validation-enabled" value="true" />
