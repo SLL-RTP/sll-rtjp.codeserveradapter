@@ -15,20 +15,17 @@
  */
 package se.sll.codeserveradapter.paymentresponsible.ws;
 
-import riv.sll.paymentresponsible._1.ResultCode;
-import riv.sll.paymentresponsible._1.ResultCodeEnumType;
 import riv.sll.paymentresponsible.listpaymentresponsibledata._1.rivtabp21.ListPaymentResponsibleDataResponderInterface;
 import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataRequest;
 import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataResponseType;
-import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
 /**
- * Mule implementation of the responsible Web Service.
+ * Web implementation of the payment responsible Web Service.
  * 
  * @author Peter
  *
  */
-public class ListPaymentResponsibleProducer extends AbstractProducer implements ListPaymentResponsibleDataResponderInterface {
+public class ListPaymentResponsibleWebProducer extends AbstractProducer implements ListPaymentResponsibleDataResponderInterface {
     
     @Override
     public ListPaymentResponsibleDataResponseType listPaymentResponsibleData(
@@ -36,22 +33,13 @@ public class ListPaymentResponsibleProducer extends AbstractProducer implements 
             final ListPaymentResponsibleDataRequest request) {
         
         final ListPaymentResponsibleDataResponseType response = new ListPaymentResponsibleDataResponseType();
-        final ResultCode rc = new ResultCode();
-        try {
-            response.setPaymentResponsibleData(getPaymentResponsibleData0(request));
-            rc.setCode(ResultCodeEnumType.OK);
-        } catch (NotFoundException ex) {
-            rc.setCode(ResultCodeEnumType.ERROR);
-            rc.setComment(ex.getMessage());
-        }
+        response.setResultCode(fulfill(new Runnable() {
+            @Override
+            public void run() {
+                response.setPaymentResponsibleData(getPaymentResponsibleData0(request));
+            }
+        }));
         
         return response;
     }
-    
-    // Auto-wiring doesn't work when running as a Mule app
-    @Override
-    protected HSAMappingService getHSAMappingService() {
-        return HSAMappingService.getInstance();
-    }
-
 }
