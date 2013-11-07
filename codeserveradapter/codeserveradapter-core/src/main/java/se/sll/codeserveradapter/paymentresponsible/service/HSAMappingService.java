@@ -15,6 +15,7 @@
  */
 package se.sll.codeserveradapter.paymentresponsible.service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +63,15 @@ public class HSAMappingService {
     @Value("${pr.mekFile}")
     private String mekFile;
 
+    @Value("${pr.companyFile}")
+    private String companyFile;
+
+    @Value("${pr.careServiceFile}")
+    private String careServiceFile;
+    
+    @Value("${pr.typeOfCooperations:06,07}")
+    private String[] typeOfCooperations;
+    
     private boolean busy;
     private static HSAMappingService instance;
     private static final Logger log = LoggerFactory.getLogger(HSAMappingService.class);
@@ -89,7 +99,10 @@ public class HSAMappingService {
         .withCommissionFile(path(commissionFile))
         .withCommissionTypeFile(path(commissionTypeFile))
         .withFacilityFile(path(facilityFile))
-        .withMekFile(path(mekFile));
+        .withMekFile(path(mekFile))
+        .withCompanyFile(path(companyFile))
+        .withCareServiceFile(path(careServiceFile))
+        .includeTypeOfCooperations(Arrays.asList(typeOfCooperations));
 
         final Map<String, List<TermItem<HSAMappingState>>> index = builder.build();
         

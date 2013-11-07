@@ -23,8 +23,8 @@
   <modules>
     <module>codeserveradapter-schemas</module>
     <module>codeserveradapter-core</module>
-    <module>codeserveradapter-mule-app</module>
     <module>codeserveradapter-web-app</module>
+    <module>codeserveradapter-mule-app</module>
   </modules>
 
   <properties>

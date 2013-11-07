@@ -36,20 +36,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import riv.sll.paymentresponsible._1.Commission;
-import riv.sll.paymentresponsible._1.Contract;
 import riv.sll.paymentresponsible._1.PaymentResponsible;
 import riv.sll.paymentresponsible._1.ResultCode;
-import riv.sll.paymentresponsible._1.ResultCodeEnumType;
+import riv.sll.paymentresponsible._1.ResultCodeEnum;
 import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataRequest;
 import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataResponse;
 import se.sll.codeserveradapter.jmx.StatusBean;
 import se.sll.codeserveradapter.parser.TermItem;
+import se.sll.codeserveradapter.paymentresponsible.model.CareServiceState;
 import se.sll.codeserveradapter.paymentresponsible.model.CommissionState;
+import se.sll.codeserveradapter.paymentresponsible.model.CompanyState;
 import se.sll.codeserveradapter.paymentresponsible.model.FacilityState;
 import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
 import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
 public abstract class AbstractProducer {
+    private static final String SPRAKTOLK_SERVICE_CODE = "01";
     private static final Logger log = LoggerFactory.getLogger("WS-API");
     private static final String SERVICE_CONSUMER_HEADER_NAME = "x-rivta-original-serviceconsumer-hsaid";
 
@@ -167,15 +169,15 @@ public abstract class AbstractProducer {
         final ResultCode rc = new ResultCode();
         try {
             runnable.run();
-            rc.setCode(ResultCodeEnumType.OK);
+            rc.setCode(ResultCodeEnum.OK);
         } catch (NotFoundException ex) {
-            rc.setCode(ResultCodeEnumType.ERROR);
-            rc.setComment(ex.getMessage() + " (" + statusBean.getGUID() + ")");
+            rc.setCode(ResultCodeEnum.ERROR);
+            rc.setMessage(ex.getMessage() + " (" + statusBean.getGUID() + ")");
             log.error(createLogMessage(ex.getMessage()));
         } catch (Throwable throwable) {
             throw createSoapFault(throwable);
         } finally {
-            statusBean.stop(rc.getCode() == ResultCodeEnumType.OK);
+            statusBean.stop(rc.getCode() == ResultCodeEnum.OK);
         }
 
         log.debug("stats: {}", statusBean.getPerformanceMetricsAsJSON());
@@ -217,14 +219,16 @@ public abstract class AbstractProducer {
         data.setServiceCode(request.getServiceCode());
 
 
+        final Date eventTime = toDate(request.getEventTime());
+
         final Map<String, List<TermItem<HSAMappingState>>> index = getHSAMappingService().getCurrentIndex();
         final List<TermItem<HSAMappingState>> hsaMappingTerms = index.get(request.getHsaId());
 
         if (hsaMappingTerms == null) {
-            throw new NotFoundException("No facility mappings found for HSA-ID: " + request.getHsaId());
+            throw new NotFoundException(String.format("No mapping to kombika found for HsaId: %s",
+                    request.getHsaId()));
         }
 
-        final Date eventTime = toDate(request.getEventTime());
         final Map<String, Commission> map = new HashMap<String, Commission>();
 
         for (final TermItem<HSAMappingState> hsaMappingTerm : hsaMappingTerms) {
@@ -232,6 +236,7 @@ public abstract class AbstractProducer {
             if (mappingState != null) {
                 final FacilityState facilityState = mappingState.getFacility().getState(eventTime);
                 if (facilityState != null) {
+                    log.debug("process facility: {}", facilityState.getName());
                     processFacility(facilityState, mappingState.getFacility().getId(), eventTime, map);
                 }
             }
@@ -240,6 +245,13 @@ public abstract class AbstractProducer {
         data.getCommissionList().addAll(map.values());
 
         log.info("comissions found {}", data.getCommissionList().size());
+
+        if (data.getCommissionList().size() == 0) {
+            throw new NotFoundException(String.format("No valid commisions found for HsaId: %s and ServiceCode: %s at the given time: %tFT%<tRZ",
+                    request.getHsaId(),
+                    request.getServiceCode(),
+                    eventTime));
+        }
         
         // sort stuff in time order
         Collections.sort(data.getCommissionList(), new Comparator<Commission>() {
@@ -266,17 +278,19 @@ public abstract class AbstractProducer {
                 if (prev != null) {
                     prev.setKombikaId(prev.getKombikaId() + "," + kombikaId);
                 } else {
-                    map.put(commission.getId(), commission);
-                    final PaymentResponsible pr = new PaymentResponsible();
-                    pr.setAddress("Dummy");
-                    pr.setName("HSF");
-                    final Contract contract = new Contract();
-                    contract.setId("N/A");
-                    contract.setName("N/A");
-                    contract.setDescription("N/A");
-                    pr.setContract(contract);
-                    pr.setId("HSF");
-                    commission.setPaymentResponsibleList(Collections.singletonList(pr));
+                    final CommissionState state = commissionTerm.getState(eventTime);
+                    final CareServiceState careServiceState = state.getCareService().getState(eventTime);
+                    if (careServiceState != null && SPRAKTOLK_SERVICE_CODE.equals(careServiceState.getCareServiceType())) {
+                        final PaymentResponsible pr = new PaymentResponsible();
+                        pr.setName(careServiceState.getName());
+                        final CompanyState companyState = careServiceState.getCompany().getState(eventTime);
+                        pr.setId(careServiceState.getCompany().getId());
+                        pr.setAddressLine1(companyState.getAddressLine1());
+                        pr.setAddressLine2(companyState.getAddressLine2());
+                        pr.setName(companyState.getName());
+                        commission.setPaymentResponsible(pr);
+                        map.put(commission.getId(), commission);
+                    }
                 }
             }
         }
@@ -294,6 +308,8 @@ public abstract class AbstractProducer {
         commission.setValidFrom(toTime(commissionState.getValidFrom()));
         commission.setValidTo(toTime(commissionState.getValidTo()));
         commission.setName(commissionState.getName());
+        commission.setContractCode(commissionState.getContractCode());
+        
         return commission;
     }
 }

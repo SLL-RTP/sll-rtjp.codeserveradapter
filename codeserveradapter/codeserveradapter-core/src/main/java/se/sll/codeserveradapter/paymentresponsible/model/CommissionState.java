@@ -27,17 +27,47 @@ import se.sll.codeserveradapter.parser.TermState;
  *
  */
 public class CommissionState extends TermState implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
     /**
      * The type.
      * @serial
      */
     private TermItem<CommissionTypeState> commissionType;
 
+    /**
+     * The Care service.
+     * @serial
+     */
+    private TermItem<CareServiceState> careService;
+    
+    /**
+     * The contract reference.
+     * @return
+     */
+    private String contractCode;
+    
+
     public TermItem<CommissionTypeState> getCommissionType() {
         return commissionType;
     }
+    
     public void setCommissionType(TermItem<CommissionTypeState> commissionType) {
         this.commissionType = commissionType;
+    }
+    
+    public TermItem<CareServiceState> getCareService() {
+        return careService;
+    }
+    
+    public void setCareService(TermItem<CareServiceState> careService) {
+        this.careService = careService;
+    }
+
+    public String getContractCode() {
+        return contractCode;
+    }
+
+    public void setContractCode(String contractCode) {
+        this.contractCode = contractCode;
     }        
 }

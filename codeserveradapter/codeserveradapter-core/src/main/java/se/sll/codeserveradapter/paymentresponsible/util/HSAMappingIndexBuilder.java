@@ -31,8 +31,10 @@ import se.sll.codeserveradapter.parser.SimpleXMLElementParser;
 import se.sll.codeserveradapter.parser.SimpleXMLElementParser.ElementMatcherCallback;
 import se.sll.codeserveradapter.parser.TermItem;
 import se.sll.codeserveradapter.parser.TermState;
+import se.sll.codeserveradapter.paymentresponsible.model.CareServiceState;
 import se.sll.codeserveradapter.paymentresponsible.model.CommissionState;
 import se.sll.codeserveradapter.paymentresponsible.model.CommissionTypeState;
+import se.sll.codeserveradapter.paymentresponsible.model.CompanyState;
 import se.sll.codeserveradapter.paymentresponsible.model.FacilityState;
 import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
 
@@ -45,6 +47,19 @@ import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
  */
 public class HSAMappingIndexBuilder {
     // attribute and element names.
+
+    private static final String VARDSERVICE = "Vårdservice";
+    private static final String AVTAL = "AVTAL";
+    private static final String STYP = "STYP";
+    private static final String VARDSERVICE_TYP = "VårdserviceTyp";
+    private static final String FORETAG = "FORETAG";
+    private static final String TILL_DATUM = "TillDatum";
+    private static final String FROM_DATUM = "FromDatum";
+    private static final String HSA_ID = "HSAId";
+    private static final String KOMBIKAKOD = "Kombikakod";
+    private static final String POSTOFFICE = "postoffice";
+    private static final String POSTNUMBER = "postnumber";
+    private static final String OFFICEPOSTADDRESS = "officepostaddress";
     private static final String ABBREVIATION = "abbreviation";
     private static final String UPPDRAGSTYP = "UPPDRAGSTYP";
     private static final String NO_COMMISSION_ID = "0000";
@@ -54,10 +69,14 @@ public class HSAMappingIndexBuilder {
     private static final Logger log = LoggerFactory.getLogger(HSAMappingIndexBuilder.class);
 
     private String mekFile;
-    private String facilityFIle;
+    private String facilityFile;
     private String commissionFile;
     private String commissionTypeFile;
+    private String companyFile;
+    private String careServiceFile;
+    
     private Date newerThan = CodeServiceXMLParser.ONE_YEAR_BACK;
+    private List<String> typeOfCooperations;
 
     /**
      * Input file for mapping (MEK) data (mandatory).
@@ -77,7 +96,7 @@ public class HSAMappingIndexBuilder {
      * @return the builder.
      */
     public HSAMappingIndexBuilder withFacilityFile(String facilityFile) {
-        this.facilityFIle = facilityFile;
+        this.facilityFile = facilityFile;
         return this;
     }
 
@@ -104,6 +123,38 @@ public class HSAMappingIndexBuilder {
     }
 
     /**
+     * Input file for company (FORETAG) data (mandatory)
+     * 
+     * @param companyFile the input XML file name.
+     * @return the builder.
+     */
+    public HSAMappingIndexBuilder withCompanyFile(String companyFile) {
+        this.companyFile = companyFile;
+        return this;
+    }
+    
+    /**
+     * Input file for care service (Vårdservice) data (mandatory)
+     * @param careServiceFile the input file.
+     * @return the builder
+     */
+    public HSAMappingIndexBuilder withCareServiceFile(String careServiceFile) {
+        this.careServiceFile = careServiceFile;
+        return this;
+    }
+    
+    /**
+     * Include only this kind of cooperations (STYP)
+     * 
+     * @param typeOfCooperations the array.
+     * @return the builder.
+     */
+    public HSAMappingIndexBuilder includeTypeOfCooperations(List<String> typeOfCooperations) {
+        this.typeOfCooperations = typeOfCooperations;
+        return this;
+    }
+    
+    /**
      * Indicates how to filter out old data items, default setting is to keep one year old data, i.e.
      * expiration date is less than one year back in time.
      * 
@@ -121,35 +172,51 @@ public class HSAMappingIndexBuilder {
      * @return a map with HSA ID as keys and {@link HSAMappingBean} as value objects.
      */
     public Map<String, List<TermItem<HSAMappingState>>> build() {
-        log.info("build commissionTypeIndex from: {}", commissionTypeFile);
-        final HashMap<String, TermItem<CommissionTypeState>> commissionTypeIndex = createCommissionTypeIndex();
-        log.info("commissionTypeIndex size: {}", commissionTypeIndex.size());
-
-        log.info("build commissionIndex from: {}", commissionFile);
-        final HashMap<String, TermItem<CommissionState>> commissionIndex = createCommissionIndex(commissionTypeIndex);
-        log.info("commissionIndex size: {}", commissionIndex.size());
-
-        log.info("build facilityIndex from: {}", facilityFIle);
-        final HashMap<String, TermItem<FacilityState>> facilityIndex = createFacilityIndex(commissionIndex);
-        log.info("facilityIndex size: {}", facilityIndex.size());
 
         log.info("build hsaMappingIndex from: {}", mekFile);
-        final Map<String, List<TermItem<HSAMappingState>>> hsaIndex = createHSAIndex(facilityIndex);
+        final Map<String, List<TermItem<HSAMappingState>>> hsaIndex = createHSAIndex();
         log.info("hsaMappingIndex size: {}", hsaIndex.size());
 
         return hsaIndex;
     }
+    
+    
+    /**
+     * Assumes list is empty or contains one item.
+     * 
+     * @param list the list.
+     * @return null or first item.
+     */
+    protected static <T> T singleton(List<T> list) {
+        if (list == null || list.size() == 0) {
+            return null;
+        }
+        if (list.size() > 1) {
+            log.warn("Expected singleton list " + list+ " has more than one entry (unsupported and unexpected behavior as result)");
+        }
+        return list.get(0);
+    }
 
     //
-    protected Map<String, List<TermItem<HSAMappingState>>> createHSAIndex(final HashMap<String, TermItem<FacilityState>> avdIndex) {
-        SimpleXMLElementParser elementParser = new SimpleXMLElementParser(this.mekFile);
+    protected boolean isCooperationValid(String cooperationType) {
+        final boolean valid = (typeOfCooperations.size() == 0) || typeOfCooperations.contains(cooperationType);
+        return valid;
+    }
+    
+    //
+    protected Map<String, List<TermItem<HSAMappingState>>> createHSAIndex() {
+        log.info("build facilityIndex from: {}", facilityFile);
+        final HashMap<String, TermItem<FacilityState>> avdIndex = createFacilityIndex();
+        log.info("facilityIndex size: {}", avdIndex.size());
+
+        final SimpleXMLElementParser elementParser = new SimpleXMLElementParser(this.mekFile);
         final Map<String, List<TermItem<HSAMappingState>>> map = new HashMap<String, List<TermItem<HSAMappingState>>>();
 
         final Map<String, Integer> elements = new HashMap<String, Integer>();
-        elements.put("Kombikakod", 1);
-        elements.put("HSAId", 2);
-        elements.put("FromDatum", 3);
-        elements.put("TillDatum", 4);
+        elements.put(KOMBIKAKOD, 1);
+        elements.put(HSA_ID, 2);
+        elements.put(FROM_DATUM, 3);
+        elements.put(TILL_DATUM, 4);
 
 
         elementParser.parse("mappning", elements, new ElementMatcherCallback() {
@@ -198,10 +265,96 @@ public class HSAMappingIndexBuilder {
 
 
     //
-    protected HashMap<String, TermItem<FacilityState>> createFacilityIndex(final HashMap<String, TermItem<CommissionState>> samverksIndex) {
+    protected HashMap<String, TermItem<CompanyState>> createCompanyIndex() {
+        final HashMap<String, TermItem<CompanyState>> index = new HashMap<String, TermItem<CompanyState>>();
+        final CodeServiceXMLParser parser = new CodeServiceXMLParser(this.companyFile, new CodeServiceEntryCallback() {
+            @Override
+            public void onCodeServiceEntry(CodeServiceEntry codeServiceEntry) {
+                TermItem<CompanyState> company = index.get(codeServiceEntry.getId());
+                if (company == null) {
+                    company = new TermItem<CompanyState>();
+                    company.setId(codeServiceEntry.getId());
+                    index.put(company.getId(), company);
+                }
+                final CompanyState companyState = new CompanyState();
+                companyState.setName(codeServiceEntry.getAttribute(ABBREVIATION));
+                companyState.setAddressLine1(codeServiceEntry.getAttribute(OFFICEPOSTADDRESS));
+                companyState.setAddressLine2(codeServiceEntry.getAttribute(POSTNUMBER) + " " + codeServiceEntry.getAttribute(POSTOFFICE));
+                companyState.setValidFrom(codeServiceEntry.getValidFrom());
+                companyState.setValidTo(codeServiceEntry.getValidTo());
+                company.addState(companyState);
+            }
+        });
+        
+        parser.extractAttribute(ABBREVIATION);
+        parser.extractAttribute(OFFICEPOSTADDRESS);
+        parser.extractAttribute(POSTNUMBER);
+        parser.extractAttribute(POSTOFFICE);
+        
+        parser.setNewerThan(newerThan);
+        
+        parser.parse();
+
+        return index;
+    }
+
+    //
+    protected HashMap<String, TermItem<CareServiceState>> createCareServiceIndex() {
+        log.info("build companyIndex from: {}", companyFile);
+        final HashMap<String, TermItem<CompanyState>> companyIndex = createCompanyIndex();
+        log.info("companyIndex size: {}", companyIndex.size());
+
+        final HashMap<String, TermItem<CareServiceState>> index = new HashMap<String, TermItem<CareServiceState>>();
+        final CodeServiceXMLParser parser = new CodeServiceXMLParser(this.careServiceFile, new CodeServiceEntryCallback() {
+            @Override
+            public void onCodeServiceEntry(CodeServiceEntry codeServiceEntry) {
+                final String typeCode = singleton(codeServiceEntry.getCodes(VARDSERVICE_TYP));
+                if (typeCode == null) {
+                    return;
+                }
+                final String companyCode = singleton(codeServiceEntry.getCodes(FORETAG));
+                if (companyCode == null) {
+                    return;
+                }
+                final TermItem<CompanyState> company = companyIndex.get(companyCode);
+                if (company == null) {
+                    return;
+                }
+                TermItem<CareServiceState> careService = index.get(codeServiceEntry.getId());
+                if (careService == null) {
+                    careService = new TermItem<CareServiceState>();
+                    careService.setId(codeServiceEntry.getId());
+                    index.put(careService.getId(), careService);
+                }
+                final CareServiceState careServiceState = new CareServiceState();
+                careServiceState.setName(codeServiceEntry.getAttribute(ABBREVIATION));
+                careServiceState.setCompany(company);
+                careServiceState.setCareServiceType(typeCode);
+                careServiceState.setValidFrom(codeServiceEntry.getValidFrom());
+                careServiceState.setValidTo(codeServiceEntry.getValidTo());
+
+                careService.addState(careServiceState);
+            }
+        });
+        
+        parser.extractAttribute(ABBREVIATION);
+        parser.extractCodeSystem(FORETAG);
+        parser.extractCodeSystem(VARDSERVICE_TYP);
+        
+        parser.parse();
+        
+        return index;
+    }
+    
+    //
+    protected HashMap<String, TermItem<FacilityState>> createFacilityIndex() {
+        log.info("build commissionIndex from: {}", commissionFile);
+        final HashMap<String, TermItem<CommissionState>> samverksIndex = createCommissionIndex();
+        log.info("commissionIndex size: {}", samverksIndex.size());
+
         final HashMap<String, TermItem<FacilityState>> index = new HashMap<String, TermItem<FacilityState>>();
 
-        CodeServiceXMLParser parser = new CodeServiceXMLParser(this.facilityFIle, new CodeServiceEntryCallback() {
+        final CodeServiceXMLParser parser = new CodeServiceXMLParser(this.facilityFile, new CodeServiceEntryCallback() {
             @Override
             public void onCodeServiceEntry(CodeServiceEntry codeServiceEntry) {
                 final List<String> codes = codeServiceEntry.getCodes(SAMVERKS);
@@ -242,20 +395,40 @@ public class HSAMappingIndexBuilder {
     }
 
     //
-    protected HashMap<String, TermItem<CommissionState>> createCommissionIndex(final HashMap<String, TermItem<CommissionTypeState>> uppdragstypIndex) {
+    protected HashMap<String, TermItem<CommissionState>> createCommissionIndex() {
+
+        log.info("build careServiceIndex from: {}", careServiceFile);
+        final HashMap<String, TermItem<CareServiceState>> careServiceIndex = createCareServiceIndex();
+        log.info("careServiceIndex size: {}", careServiceIndex.size());
+
         final HashMap<String, TermItem<CommissionState>> index = new HashMap<String, TermItem<CommissionState>>();
 
-        CodeServiceXMLParser parser = new CodeServiceXMLParser(this.commissionFile, new CodeServiceEntryCallback() {
+        log.info("build commissionTypeIndex from: {}", commissionTypeFile);
+        final HashMap<String, TermItem<CommissionTypeState>> uppdragstypIndex = createCommissionTypeIndex();
+        log.info("commissionTypeIndex size: {}", uppdragstypIndex.size());
+
+        final CodeServiceXMLParser parser = new CodeServiceXMLParser(this.commissionFile, new CodeServiceEntryCallback() {
             @Override
             public void onCodeServiceEntry(CodeServiceEntry codeServiceEntry) {
-                TermItem<CommissionTypeState> uppdragstyp = null;
-                List<String> ul = codeServiceEntry.getCodes(UPPDRAGSTYP);
-                if (ul != null && ul.size() == 1) {
-                    uppdragstyp = uppdragstypIndex.get(ul.get(0));
-                }
-                if (uppdragstyp == null) {
+                final String cooperationType = singleton(codeServiceEntry.getCodes(STYP));
+                if (!isCooperationValid(cooperationType)) {
+                    log.trace("No such cooperation code: {}", cooperationType);
                     return;
                 }
+                ;
+                final String uCode = singleton(codeServiceEntry.getCodes(UPPDRAGSTYP));
+                final TermItem<CommissionTypeState> uppdragstyp = (uCode == null) ? null : uppdragstypIndex.get(uCode);
+                if (uppdragstyp == null) {
+                    log.trace("No such commission: {}",  uCode);
+                    return;
+                }
+                final String sCode = singleton(codeServiceEntry.getCodes(VARDSERVICE));
+                final TermItem<CareServiceState> careItem = (sCode == null) ? null : careServiceIndex.get(sCode);
+                if (careItem == null) {
+                    log.trace("No such care service code: {}", sCode);
+                    return;
+                }
+                
                 TermItem<CommissionState> commission = index.get(codeServiceEntry.getId());
                 if (commission == null) {
                     commission = new TermItem<CommissionState>();
@@ -263,18 +436,26 @@ public class HSAMappingIndexBuilder {
                     index.put(codeServiceEntry.getId(), commission);
                 }
                 final CommissionState state = new CommissionState();
+                state.setContractCode(singleton(codeServiceEntry.getCodes(AVTAL)));
                 state.setName(codeServiceEntry.getAttribute(ABBREVIATION));
                 state.setCommissionType(uppdragstyp);
                 state.setValidFrom(codeServiceEntry.getValidFrom());
                 state.setValidTo(codeServiceEntry.getValidTo());
+                state.setCareService(careServiceIndex.get(sCode));
+                state.setCareService(careItem);
+
                 commission.addState(state);
             }
         });
 
         parser.extractAttribute(ABBREVIATION);
         parser.extractCodeSystem(UPPDRAGSTYP);
+        parser.extractCodeSystem(STYP);
+        parser.extractCodeSystem(AVTAL);
+        parser.extractCodeSystem(VARDSERVICE);
+        
         parser.setNewerThan(newerThan);
-
+    
         parser.parse();
 
         return index;
@@ -284,7 +465,7 @@ public class HSAMappingIndexBuilder {
     protected HashMap<String, TermItem<CommissionTypeState>> createCommissionTypeIndex() {
         final HashMap<String, TermItem<CommissionTypeState>> index = new HashMap<String, TermItem<CommissionTypeState>>();
 
-        CodeServiceXMLParser parser = new CodeServiceXMLParser(this.commissionTypeFile, new CodeServiceEntryCallback() {
+        final CodeServiceXMLParser parser = new CodeServiceXMLParser(this.commissionTypeFile, new CodeServiceEntryCallback() {
             @Override
             public void onCodeServiceEntry(CodeServiceEntry codeServiceEntry) {
                 TermItem<CommissionTypeState> commissionType = index.get(codeServiceEntry.getId());

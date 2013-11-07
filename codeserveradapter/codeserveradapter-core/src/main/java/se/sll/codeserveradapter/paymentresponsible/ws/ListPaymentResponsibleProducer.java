@@ -16,7 +16,7 @@
 package se.sll.codeserveradapter.paymentresponsible.ws;
 
 import riv.sll.paymentresponsible._1.ResultCode;
-import riv.sll.paymentresponsible._1.ResultCodeEnumType;
+import riv.sll.paymentresponsible._1.ResultCodeEnum;
 import riv.sll.paymentresponsible.listpaymentresponsibledata._1.rivtabp21.ListPaymentResponsibleDataResponderInterface;
 import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataRequest;
 import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataResponseType;
@@ -39,10 +39,10 @@ public class ListPaymentResponsibleProducer extends AbstractProducer implements 
         final ResultCode rc = new ResultCode();
         try {
             response.setPaymentResponsibleData(getPaymentResponsibleData0(request));
-            rc.setCode(ResultCodeEnumType.OK);
+            rc.setCode(ResultCodeEnum.OK);
         } catch (NotFoundException ex) {
-            rc.setCode(ResultCodeEnumType.ERROR);
-            rc.setComment(ex.getMessage());
+            rc.setCode(ResultCodeEnum.ERROR);
+            rc.setMessage(ex.getMessage());
         }
         
         return response;

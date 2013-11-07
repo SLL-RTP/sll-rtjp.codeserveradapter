@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.soitoolkit.commons.mule.util.RecursiveResourceBundle;
 
 import riv.sll.paymentresponsible._1.ResultCode;
-import riv.sll.paymentresponsible._1.ResultCodeEnumType;
+import riv.sll.paymentresponsible._1.ResultCodeEnum;
 import riv.sll.paymentresponsible.listpaymentresponsibledata._1.rivtabp21.ListPaymentResponsibleDataResponderInterface;
 import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataRequest;
 import riv.sll.paymentresponsible.listpaymentresponsibledataresponder._1.ListPaymentResponsibleDataResponse;
@@ -68,7 +68,7 @@ public class PaymentResponsibleTestProducer implements ListPaymentResponsibleDat
         data.setHsaId(id);
         
         ResultCode rc = new ResultCode();
-        rc.setCode(ResultCodeEnumType.OK);
+        rc.setCode(ResultCodeEnum.OK);
         response.setResultCode(rc);
         return response;
     }

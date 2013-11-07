@@ -38,9 +38,9 @@ public class HSAMappingIndexBuilderTest extends TestSupport {
     public void parse_success() {
         hsaMappingService.revalidate();
         final Map<String, List<TermItem<HSAMappingState>>> index = hsaMappingService.getCurrentIndex();
-      
+              
         assertTrue(index.size() == 1);
-        
+                
         for (List<TermItem<HSAMappingState>> list : index.values()) {
             assertFalse(list.size() == 0);
             for (TermItem<HSAMappingState> mapping : list) {
