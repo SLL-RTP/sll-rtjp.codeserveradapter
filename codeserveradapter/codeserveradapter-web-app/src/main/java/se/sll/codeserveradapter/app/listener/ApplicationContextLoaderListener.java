@@ -38,14 +38,21 @@ import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 public class ApplicationContextLoaderListener extends ContextLoaderListener {
     private static final Logger log = LoggerFactory.getLogger(ApplicationContextLoaderListener.class);
 
+    
     @Override
     public void contextInitialized(ServletContextEvent event) {
         super.contextInitialized(event);
-        log.info("======== CodeServerAdapter Application :: Started ========");
-        if (HSAMappingService.getInstance().getCurrentIndex() == null) {
-            log.info("revalidate index");
-            HSAMappingService.getInstance().revalidate();
+        try {
+            final WebApplicationContext wc = getWebRequest(event.getServletContext());
+            final HSAMappingService hsaMappingService = wc.getBean(HSAMappingService.class);
+            if (hsaMappingService.getCurrentIndex() == null) {
+                log.info("Index needs to be revalidated, takes some time please be patient");
+                hsaMappingService.revalidate();
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
         }
+        log.info("======== CodeServerAdapter Application :: Started ========");
     }
 
     @Override
