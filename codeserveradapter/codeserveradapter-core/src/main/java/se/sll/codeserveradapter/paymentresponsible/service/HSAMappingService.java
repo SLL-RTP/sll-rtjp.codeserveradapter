@@ -72,6 +72,12 @@ public class HSAMappingService {
     @Value("${pr.typeOfCooperations:06,07}")
     private String[] typeOfCooperations;
     
+    @Value("${pr.hsfCode:1300}")
+    private String hsfCode;
+
+    @Value("${pr.tioHundraCode:8590}")
+    private String tioHundraCode;
+    
     private boolean busy;
     private static HSAMappingService instance;
     private static final Logger log = LoggerFactory.getLogger(HSAMappingService.class);
@@ -122,6 +128,14 @@ public class HSAMappingService {
 
     protected void setBusy(boolean busy) {
         this.busy = busy;
+    }
+    
+    public String getHSFCode() {
+        return hsfCode;
+    }
+    
+    public String getTioHundraCode() {
+        return tioHundraCode;
     }
 
     /**

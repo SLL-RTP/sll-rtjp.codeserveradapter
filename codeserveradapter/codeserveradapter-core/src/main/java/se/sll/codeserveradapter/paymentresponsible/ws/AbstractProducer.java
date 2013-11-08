@@ -51,6 +51,9 @@ import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
 import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
 public abstract class AbstractProducer {
+    private static final String UNKNOWN_RESP = "Okänd";
+    private static final String TIO_HUNDRA_RESP = "TioHundra";
+    private static final String HSF_RESP = "HSF";
     private static final String SPRAKTOLK_SERVICE_CODE = "01";
     private static final Logger log = LoggerFactory.getLogger("WS-API");
     private static final String SERVICE_CONSUMER_HEADER_NAME = "x-rivta-original-serviceconsumer-hsaid";
@@ -265,6 +268,17 @@ public abstract class AbstractProducer {
     }
 
     //
+    protected static String mapCompanyId(String id) {
+      if (id.equals(HSAMappingService.getInstance().getHSFCode())) {
+          return HSF_RESP;
+      }
+      if (id.equals(HSAMappingService.getInstance().getTioHundraCode())) {
+          return TIO_HUNDRA_RESP;
+      }
+      return UNKNOWN_RESP;
+    }
+    
+    //
     protected static void processFacility(final FacilityState facilityState, 
             final String kombikaId, 
             final Date eventTime,  
@@ -284,7 +298,7 @@ public abstract class AbstractProducer {
                         final PaymentResponsible pr = new PaymentResponsible();
                         pr.setName(careServiceState.getName());
                         final CompanyState companyState = careServiceState.getCompany().getState(eventTime);
-                        pr.setId(careServiceState.getCompany().getId());
+                        pr.setId(mapCompanyId(careServiceState.getCompany().getId()));
                         pr.setAddressLine1(companyState.getAddressLine1());
                         pr.setAddressLine2(companyState.getAddressLine2());
                         pr.setName(companyState.getName());
