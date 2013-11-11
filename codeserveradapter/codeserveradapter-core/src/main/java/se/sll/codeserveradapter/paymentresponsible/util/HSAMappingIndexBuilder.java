@@ -76,7 +76,6 @@ public class HSAMappingIndexBuilder {
     private String careServiceFile;
     
     private Date newerThan = CodeServiceXMLParser.ONE_YEAR_BACK;
-    private List<String> typeOfCooperations;
 
     /**
      * Input file for mapping (MEK) data (mandatory).
@@ -143,17 +142,7 @@ public class HSAMappingIndexBuilder {
         return this;
     }
     
-    /**
-     * Include only this kind of cooperations (STYP)
-     * 
-     * @param typeOfCooperations the array.
-     * @return the builder.
-     */
-    public HSAMappingIndexBuilder includeTypeOfCooperations(List<String> typeOfCooperations) {
-        this.typeOfCooperations = typeOfCooperations;
-        return this;
-    }
-    
+
     /**
      * Indicates how to filter out old data items, default setting is to keep one year old data, i.e.
      * expiration date is less than one year back in time.
@@ -197,12 +186,7 @@ public class HSAMappingIndexBuilder {
         return list.get(0);
     }
 
-    //
-    protected boolean isCooperationValid(String cooperationType) {
-        final boolean valid = (typeOfCooperations.size() == 0) || typeOfCooperations.contains(cooperationType);
-        return valid;
-    }
-    
+   
     //
     protected Map<String, List<TermItem<HSAMappingState>>> createHSAIndex() {
         log.info("build facilityIndex from: {}", facilityFile);
@@ -410,12 +394,6 @@ public class HSAMappingIndexBuilder {
         final CodeServiceXMLParser parser = new CodeServiceXMLParser(this.commissionFile, new CodeServiceEntryCallback() {
             @Override
             public void onCodeServiceEntry(CodeServiceEntry codeServiceEntry) {
-                final String cooperationType = singleton(codeServiceEntry.getCodes(STYP));
-                if (!isCooperationValid(cooperationType)) {
-                    log.trace("No such cooperation code: {}", cooperationType);
-                    return;
-                }
-                ;
                 final String uCode = singleton(codeServiceEntry.getCodes(UPPDRAGSTYP));
                 final TermItem<CommissionTypeState> uppdragstyp = (uCode == null) ? null : uppdragstypIndex.get(uCode);
                 if (uppdragstyp == null) {

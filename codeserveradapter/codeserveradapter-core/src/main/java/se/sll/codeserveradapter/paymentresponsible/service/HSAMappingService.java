@@ -69,14 +69,11 @@ public class HSAMappingService {
     @Value("${pr.careServiceFile}")
     private String careServiceFile;
     
-    @Value("${pr.typeOfCooperations:06,07}")
-    private String[] typeOfCooperations;
-    
-    @Value("${pr.hsfCode:1300}")
-    private String hsfCode;
+    @Value("${pr.hsfCodes:1300}")
+    private String[] hsfCodes;
 
-    @Value("${pr.tioHundraCode:8590}")
-    private String tioHundraCode;
+    @Value("${pr.tioHundraCodes:8590}")
+    private String[] tioHundraCodes;
     
     private boolean busy;
     private static HSAMappingService instance;
@@ -107,8 +104,7 @@ public class HSAMappingService {
         .withFacilityFile(path(facilityFile))
         .withMekFile(path(mekFile))
         .withCompanyFile(path(companyFile))
-        .withCareServiceFile(path(careServiceFile))
-        .includeTypeOfCooperations(Arrays.asList(typeOfCooperations));
+        .withCareServiceFile(path(careServiceFile));
 
         final Map<String, List<TermItem<HSAMappingState>>> index = builder.build();
         
@@ -130,12 +126,12 @@ public class HSAMappingService {
         this.busy = busy;
     }
     
-    public String getHSFCode() {
-        return hsfCode;
+    public String[] getHSFCodes() {
+        return hsfCodes;
     }
     
-    public String getTioHundraCode() {
-        return tioHundraCode;
+    public String[] getTioHundraCodes() {
+        return tioHundraCodes;
     }
 
     /**

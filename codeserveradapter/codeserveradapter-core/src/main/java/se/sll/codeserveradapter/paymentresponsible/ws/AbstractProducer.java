@@ -268,14 +268,24 @@ public abstract class AbstractProducer {
     }
 
     //
+    protected static boolean contains(String[] list, String id) {
+        for (final String e : list) {
+            if (id.equals(e)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    //
     protected static String mapCompanyId(String id) {
-      if (id.equals(HSAMappingService.getInstance().getHSFCode())) {
-          return HSF_RESP;
-      }
-      if (id.equals(HSAMappingService.getInstance().getTioHundraCode())) {
-          return TIO_HUNDRA_RESP;
-      }
-      return UNKNOWN_RESP;
+        if (contains(HSAMappingService.getInstance().getHSFCodes(), id)) {
+            return HSF_RESP;
+        }
+        if (contains(HSAMappingService.getInstance().getTioHundraCodes(), id)) {
+            return TIO_HUNDRA_RESP;
+        }
+        return UNKNOWN_RESP;
     }
     
     //
