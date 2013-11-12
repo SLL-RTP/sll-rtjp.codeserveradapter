@@ -28,6 +28,7 @@ public class HistoryTimer extends Timer implements Serializable {
     private int len;
     private int ofs = 0;
     private long[] history;
+    private boolean[] success;
 
     //
     public HistoryTimer(String name, int len) {
@@ -35,26 +36,29 @@ public class HistoryTimer extends Timer implements Serializable {
         this.len = len;
         this.history = new long[len];
         Arrays.fill(history, -1);
+        this.success = new boolean[len];
     }
 
     //
-    public void add(long t) {
-        if (ofs >= len) {
-            ofs = 0;
+    public void add(final long t, final boolean success) {
+        if (this.ofs >= len) {
+            this.ofs = 0;
         }
-        history[ofs++] = t;
+        this.success[ofs] = success;
+        this.history[ofs] = t;
+        this.ofs++;
     }
 
     //
     public synchronized void recalc() {
         reset();
         for (int i = 0; i < len && history[i] >= 0; i++) {
-            super.add(history[i]);
+            super.add(history[i], success[i]);
         }
     }
 
     @Override
     public synchronized String toString() {
-        return String.format("{ name: \"%s\", history: %d, min: %d, max: %d, avg: %d }", name(), n(), min(), max(), avg());
+        return String.format("{ name: \"%s\", history: %d, min: %d, max: %d, avg: %d, error: %d }", name(), n(), min(), max(), avg(), e());
     }
 }

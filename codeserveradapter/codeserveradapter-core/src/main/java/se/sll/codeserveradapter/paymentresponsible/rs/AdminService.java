@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import se.sll.codeserveradapter.jmx.StatusBean;
 import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
 /**
@@ -34,11 +35,20 @@ public class AdminService {
     @Autowired
     private HSAMappingService hsaMappingService;
 
+    @Autowired
+    private StatusBean statusBean;
+
     @GET
     @Produces("application/json")
     @Path("/revalidate-index")
     public Response rebuildIndex() {
-        hsaMappingService.revalidate();
-        return Response.ok().build();
+        boolean success = false;
+        statusBean.start("/revalidate-index");
+        try {
+            hsaMappingService.revalidate();
+            return Response.ok().build();
+        } finally {
+            statusBean.stop(success);
+        }
     }
 }

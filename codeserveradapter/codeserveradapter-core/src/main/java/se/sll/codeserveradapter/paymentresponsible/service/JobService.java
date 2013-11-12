@@ -29,6 +29,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import se.sll.codeserveradapter.jmx.StatusBean;
+
 /**
  * Service executing batch jobs. Currently it's only about fetching master data files, and rebuild
  * the index.
@@ -48,6 +50,9 @@ public class JobService {
     
     @Autowired
     private HSAMappingService hsaMappingService;
+    
+    @Autowired
+    private StatusBean statusBean;
 
     /**
      * Invokes and externally managed script to fetch master data, and
@@ -63,6 +68,8 @@ public class JobService {
             return;
         }
         log.info("Fetch files using script {}", script);
+        boolean success = false;
+        statusBean.start(script);
         try {
             final Process p = Runtime.getRuntime().exec(script, null, new File(localPath));
             close(p.getOutputStream());
@@ -74,9 +81,12 @@ public class JobService {
             } else {
                 log.info("Script {} completed successfully", script);
                 hsaMappingService.revalidate();
+                success = true;
             }
         } catch (Exception e) {
             log.error("Unable to update from master data " + script, e);
+        } finally {
+            statusBean.stop(success);
         }
     }
     

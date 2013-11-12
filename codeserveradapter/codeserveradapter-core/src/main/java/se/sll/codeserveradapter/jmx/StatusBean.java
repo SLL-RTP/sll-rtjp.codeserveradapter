@@ -168,7 +168,7 @@ public class StatusBean {
             timer = new HistoryTimer(name, this.historyLength);
             timerMap.put(name, timer);
         }
-        timer.add(elapsed);
+        timer.add(elapsed, success);
         if (samples.get().size() == 0) {
             concurrency.dec(success);
         }

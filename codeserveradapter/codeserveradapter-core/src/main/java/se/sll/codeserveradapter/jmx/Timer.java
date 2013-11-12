@@ -30,6 +30,11 @@ public class Timer implements Serializable {
      */
     private long n;
     /**
+     * Number of errors.
+     * @serial
+     */
+    private long e;
+    /**
      * Min time in millis.
      * @serial
      */
@@ -63,15 +68,19 @@ public class Timer implements Serializable {
 
 
     //
-    public void add(long t) {
+    public void add(final long t, final boolean success) {
         sum += t;
         min = Math.min(min, t);
         max = Math.max(max, t);
         n++;
+        if (!success) {
+            e++;
+        }
     }
 
     //
     protected void reset() {
+        e   = 0L;
         n   = 0L;
         sum = 0L;
         min = Long.MAX_VALUE;
@@ -95,6 +104,11 @@ public class Timer implements Serializable {
     //
     public long n() {
         return n;
+    }
+    
+    //
+    public long e() {
+        return e;
     }
 
     @Override
