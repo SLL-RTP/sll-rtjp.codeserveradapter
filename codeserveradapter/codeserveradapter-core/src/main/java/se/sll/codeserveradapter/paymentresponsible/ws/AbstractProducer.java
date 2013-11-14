@@ -247,10 +247,10 @@ public abstract class AbstractProducer {
 
         data.getCommissionList().addAll(map.values());
 
-        log.info("comissions found {}", data.getCommissionList().size());
+        log.info("commissions found {}", data.getCommissionList().size());
 
         if (data.getCommissionList().size() == 0) {
-            throw new NotFoundException(String.format("No valid commisions found for HsaId: %s and ServiceCode: %s at the given time: %tFT%<tRZ",
+            throw new NotFoundException(String.format("No valid commissions found for HsaId: %s and ServiceCode: %s at the given time: %tFT%<tRZ",
                     request.getHsaId(),
                     request.getServiceCode(),
                     eventTime));
