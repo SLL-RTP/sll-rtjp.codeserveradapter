@@ -174,7 +174,7 @@ public abstract class AbstractProducer {
             runnable.run();
             rc.setCode(ResultCodeEnum.OK);
         } catch (NotFoundException ex) {
-            rc.setCode(ResultCodeEnum.ERROR);
+            rc.setCode(ResultCodeEnum.NOTFOUND_ERROR);
             rc.setMessage(ex.getMessage() + " (" + statusBean.getGUID() + ")");
             log.error(createLogMessage(ex.getMessage()));
         } catch (Throwable throwable) {

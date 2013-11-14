@@ -41,7 +41,7 @@ public class ListPaymentResponsibleProducer extends AbstractProducer implements 
             response.setPaymentResponsibleData(getPaymentResponsibleData0(request));
             rc.setCode(ResultCodeEnum.OK);
         } catch (NotFoundException ex) {
-            rc.setCode(ResultCodeEnum.ERROR);
+            rc.setCode(ResultCodeEnum.NOTFOUND_ERROR);
             rc.setMessage(ex.getMessage());
         }
         
