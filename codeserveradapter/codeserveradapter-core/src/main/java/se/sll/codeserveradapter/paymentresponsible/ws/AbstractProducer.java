@@ -50,8 +50,12 @@ import se.sll.codeserveradapter.paymentresponsible.model.FacilityState;
 import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
 import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
+/**
+ * Abstracts service producer.
+ * 
+ * @author Peter
+ */
 public abstract class AbstractProducer {
-    private static final String UNKNOWN_RESP = "Okänd";
     private static final String TIO_HUNDRA_RESP = "TioHundra";
     private static final String HSF_RESP = "HSF";
     private static final String SPRAKTOLK_SERVICE_CODE = "01";
@@ -285,7 +289,7 @@ public abstract class AbstractProducer {
         if (contains(HSAMappingService.getInstance().getTioHundraCodes(), id)) {
             return TIO_HUNDRA_RESP;
         }
-        return UNKNOWN_RESP;
+        return id;
     }
     
     //
