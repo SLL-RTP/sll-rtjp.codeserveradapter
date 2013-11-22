@@ -40,6 +40,27 @@
           </execution>
         </executions>
       </plugin>
+
+      
+     <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-domain-schemas</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+		<descriptor>src/main/resources/assembly-schemas.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+	  </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.cxf</groupId>
         <artifactId>cxf-codegen-plugin</artifactId>
