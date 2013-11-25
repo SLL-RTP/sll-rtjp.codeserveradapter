@@ -61,7 +61,7 @@
 	  <properties>
 	  </properties>
 	  <strictCheck>true</strictCheck>
-	  <header>http://adapter-services.sll-rtjp.googlecode.com/git/LICENSE.txt</header>
+	  <header>http://codeserveradapter.sll-rtjp.googlecode.com/git/LICENSE.txt</header>
 	  <encoding>UTF-8</encoding>
 	  <includes>
 	    <include>src/main/**</include>
