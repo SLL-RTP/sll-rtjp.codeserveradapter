@@ -27,6 +27,11 @@
   </context-param>
   
   <context-param>
+    <param-name>webAppRootKey</param-name>
+        <param-value>codeserveradapter-web-app.root</param-value>
+  </context-param>
+  
+  <context-param>
         <param-name>log4jConfigLocation</param-name>
         <param-value>file:${user.home}/sll-invoice-data/log4j.xml</param-value>
   </context-param>
