@@ -17,7 +17,7 @@
   specific language governing permissions and limitations
   under the License.
 -->		
-<wsdl:definitions name='ListPaymentResponsibleInteraction' xmlns:wsdl='http://schemas.xmlsoap.org/wsdl/' 
+<wsdl:definitions name='ListPaymentResponsibleDataInteraction' xmlns:wsdl='http://schemas.xmlsoap.org/wsdl/' 
   xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' 
   xmlns:xs='http://www.w3.org/2001/XMLSchema' 
   xmlns:tjsr='urn:riv:sll:paymentresponsible:ListPaymentResponsibleDataResponder:1' 
@@ -25,7 +25,7 @@
   targetNamespace='urn:riv:sll:paymentresponsible:ListPaymentResponsibleData:1:rivtabp21' 
   xmlns:itr='urn:riv:itintegration:registry:1'>
   <wsdl:documentation>
-    Tjänsteinteraktionens namn: ListPaymentResponsibleInteraction
+    Tjänsteinteraktionens namn: ListPaymentResponsibleDataInteraction
     Beskrivning: 
   </wsdl:documentation>
   <wsdl:types>
