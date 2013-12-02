@@ -262,8 +262,15 @@ public class HSAMappingIndexBuilder {
                 }
                 final CompanyState companyState = new CompanyState();
                 companyState.setName(codeServiceEntry.getAttribute(ABBREVIATION));
-                companyState.setAddressLine1(codeServiceEntry.getAttribute(OFFICEPOSTADDRESS));
-                companyState.setAddressLine2(codeServiceEntry.getAttribute(POSTNUMBER) + " " + codeServiceEntry.getAttribute(POSTOFFICE));
+                final String postAddress = codeServiceEntry.getAttribute(OFFICEPOSTADDRESS);
+                if (postAddress != null) {
+                    companyState.setAddressLine1(codeServiceEntry.getAttribute(OFFICEPOSTADDRESS));
+                }
+                final String postNumber = codeServiceEntry.getAttribute(POSTNUMBER);
+                final String postOffice = codeServiceEntry.getAttribute(POSTOFFICE);
+                if (postNumber != null && postOffice != null) {
+                    companyState.setAddressLine2(postNumber + " " + postOffice);
+                }
                 companyState.setValidFrom(codeServiceEntry.getValidFrom());
                 companyState.setValidTo(codeServiceEntry.getValidTo());
                 company.addState(companyState);
@@ -316,7 +323,6 @@ public class HSAMappingIndexBuilder {
                 careServiceState.setCareServiceType(typeCode);
                 careServiceState.setValidFrom(codeServiceEntry.getValidFrom());
                 careServiceState.setValidTo(codeServiceEntry.getValidTo());
-
                 careService.addState(careServiceState);
             }
         });
@@ -419,9 +425,8 @@ public class HSAMappingIndexBuilder {
                 state.setCommissionType(uppdragstyp);
                 state.setValidFrom(codeServiceEntry.getValidFrom());
                 state.setValidTo(codeServiceEntry.getValidTo());
-                state.setCareService(careServiceIndex.get(sCode));
                 state.setCareService(careItem);
-
+                
                 commission.addState(state);
             }
         });
