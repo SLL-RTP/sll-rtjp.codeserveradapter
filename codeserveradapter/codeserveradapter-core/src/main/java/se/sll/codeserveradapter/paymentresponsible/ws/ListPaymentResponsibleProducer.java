@@ -38,7 +38,7 @@ public class ListPaymentResponsibleProducer extends AbstractProducer implements 
         final ListPaymentResponsibleDataResponseType response = new ListPaymentResponsibleDataResponseType();
         final ResultCode rc = new ResultCode();
         try {
-            response.setPaymentResponsibleData(getPaymentResponsibleData0(request));
+            response.getPaymentResponsibleData().addAll(getPaymentResponsibleData(request));
             rc.setCode(ResultCodeEnum.OK);
         } catch (NotFoundException ex) {
             rc.setCode(ResultCodeEnum.NOTFOUND_ERROR);

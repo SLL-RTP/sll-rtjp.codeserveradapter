@@ -47,7 +47,11 @@ public class PaymentResponsibleTestProducer implements ListPaymentResponsibleDat
            ListPaymentResponsibleDataRequest request) {
         log.info("PaymentResponsibleTestProducer received the request: {}", request);
 
-        String id = request.getHsaId();
+        String id = null;
+        
+        if (request.getHsaId().size() > 0) {
+        	id = request.getHsaId().get(0);
+        }
 
         // Return an error-message if invalid id
         if (TEST_ID_FAULT_INVALID_ID.equals(id)) {
@@ -64,7 +68,8 @@ public class PaymentResponsibleTestProducer implements ListPaymentResponsibleDat
         // Produce the response
         ListPaymentResponsibleDataResponseType response = new ListPaymentResponsibleDataResponseType();
         ListPaymentResponsibleDataResponse data = new ListPaymentResponsibleDataResponse();
-        response.setPaymentResponsibleData(data);
+                
+        response.getPaymentResponsibleData().add(data);
         data.setHsaId(id);
         
         ResultCode rc = new ResultCode();
