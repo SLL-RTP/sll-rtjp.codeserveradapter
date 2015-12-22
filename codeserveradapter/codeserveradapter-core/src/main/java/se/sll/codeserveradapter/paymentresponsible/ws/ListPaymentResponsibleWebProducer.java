@@ -36,7 +36,7 @@ public class ListPaymentResponsibleWebProducer extends AbstractProducer implemen
         response.setResultCode(fulfill(new Runnable() {
             @Override
             public void run() {
-                response.setPaymentResponsibleData(getPaymentResponsibleData0(request));
+                response.getPaymentResponsibleData().addAll(getPaymentResponsibleData(request));
             }
         }));
         

@@ -24,7 +24,7 @@
 
 	<xs:complexType name="ListPaymentResponsibleDataRequest">
 		<xs:sequence>
-			<xs:element name="hsaId" type="xs:string" />
+			<xs:element name="hsaId" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
 			<xs:element name="serviceCode" type="xs:string" />
 			<xs:element name="eventTime" type="xs:dateTime" />
 		</xs:sequence>
@@ -34,7 +34,7 @@
 		<xs:sequence>
 			<xs:element name="hsaId" type="xs:string" />
 			<xs:element name="serviceCode" type="xs:string" />
-			<xs:element name="commissionList" type="core:Commission" minOccurs="1" 
+			<xs:element name="commissionList" type="core:Commission" minOccurs="0" 
 				maxOccurs="unbounded"/>			
 			<xs:any namespace="##other" processContents="lax" minOccurs="0"
 				maxOccurs="unbounded" />
@@ -47,7 +47,7 @@
 			<xs:element name="resultCode" type="core:ResultCode"
 				maxOccurs="1" minOccurs="1" />
 			<xs:element name='paymentResponsibleData'
-				type="tns:ListPaymentResponsibleDataResponse" minOccurs="0"/>
+				type="tns:ListPaymentResponsibleDataResponse" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:any namespace="##other" processContents="lax" minOccurs="0"
 				maxOccurs="unbounded" />
 		</xs:sequence>

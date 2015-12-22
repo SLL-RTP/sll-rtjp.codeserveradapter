@@ -81,6 +81,6 @@ public class PaymentResponsibleIntegrationTest extends AbstractTestCase {
         final String id = "SE2321000016-14L1";
         PaymentResponsibleTestConsumer consumer = new PaymentResponsibleTestConsumer(DEFAULT_SERVICE_ADDRESS);
         ListPaymentResponsibleDataResponseType response = consumer.callService(id);
-        assertEquals(id,  response.getPaymentResponsibleData().getHsaId());
+        assertEquals(id,  response.getPaymentResponsibleData().get(0).getHsaId());
     }
 }

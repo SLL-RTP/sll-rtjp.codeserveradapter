@@ -17,6 +17,9 @@ package se.sll.codeserveradapter.paymentresponsible;
 
 import static se.sll.codeserveradapter.CodeserveradapterMuleServer.getAddress;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,13 +42,16 @@ public class PaymentResponsibleTestConsumer extends AbstractTestConsumer<ListPay
             String serviceAddress = getAddress("pr.ws.inboundURL");
             PaymentResponsibleTestConsumer consumer = new PaymentResponsibleTestConsumer(serviceAddress);
             ListPaymentResponsibleDataResponseType response = consumer.callService("1234");
-            log.info("Returned value = " + response.getPaymentResponsibleData().getHsaId());
+            log.info("Returned value = " + response.getPaymentResponsibleData().get(0).getHsaId());
     }
 
     public ListPaymentResponsibleDataResponseType callService(String id) {
             log.debug("Calling sample-soap-service with id = {}", id);
+            List<String> hsaIdList = new ArrayList<String>();
+            hsaIdList.add(id);
+            
             final ListPaymentResponsibleDataRequest request = new ListPaymentResponsibleDataRequest();
-            request.setHsaId(id);
+            request.getHsaId().addAll(hsaIdList);
             request.setEventTime(now());
             request.setServiceCode("01");
             final ListPaymentResponsibleDataResponseType response = _service.listPaymentResponsibleData("location", request);

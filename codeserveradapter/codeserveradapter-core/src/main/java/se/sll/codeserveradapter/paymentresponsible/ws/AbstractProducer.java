@@ -15,6 +15,7 @@
  */
 package se.sll.codeserveradapter.paymentresponsible.ws;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -215,62 +216,115 @@ public abstract class AbstractProducer {
         return (cal == null) ? null : cal.toGregorianCalendar().getTime();
     }
 
-    
-    //
-    protected ListPaymentResponsibleDataResponse getPaymentResponsibleData0(
+    protected List<ListPaymentResponsibleDataResponse> getPaymentResponsibleData(
             final ListPaymentResponsibleDataRequest request) {
 
+    	List<ListPaymentResponsibleDataResponse> dataList = null;
+    	final List<String> hsaIdList = request.getHsaId();
+    	final Date eventTime = toDate(request.getEventTime());
+    	
+    	if (isBatchRequest(hsaIdList)) {
+    		dataList = processBatchRequest(hsaIdList, eventTime, request.getServiceCode());
+    	} else {
+    		dataList = processSingleRequest(hsaIdList.get(0), eventTime, request.getServiceCode());
+    	}
+	    return dataList;
+    }
+    
+    private boolean isBatchRequest(List<String> hsaIdList) {
+    	if (hsaIdList == null) {
+    		throw new NotFoundException("Found empty list 'hsaId'");
+    	}
+    	return hsaIdList.size() > 1;    	
+    }
+    
+    private List<ListPaymentResponsibleDataResponse> processSingleRequest(String hsaId, Date eventTime, String serviceCode) {
+    	List<ListPaymentResponsibleDataResponse> dataList = new ArrayList<ListPaymentResponsibleDataResponse>();
+    	final ListPaymentResponsibleDataResponse data = new ListPaymentResponsibleDataResponse();
+        data.setHsaId(hsaId);
+        data.setServiceCode(serviceCode);
 
-        final ListPaymentResponsibleDataResponse data = new ListPaymentResponsibleDataResponse();
-        data.setHsaId(request.getHsaId());
-        data.setServiceCode(request.getServiceCode());
-
-
-        final Date eventTime = toDate(request.getEventTime());
-
-        final Map<String, List<TermItem<HSAMappingState>>> index = getHSAMappingService().getCurrentIndex();
-        final List<TermItem<HSAMappingState>> hsaMappingTerms = index.get(request.getHsaId());
+        final List<TermItem<HSAMappingState>> hsaMappingTerms = getHsaMappingTerms(hsaId);
 
         if (hsaMappingTerms == null) {
             throw new NotFoundException(String.format("No mapping to kombika found for HsaId: %s",
-                    request.getHsaId()));
+            		hsaId));
         }
+        
+        data.getCommissionList().addAll(getCommissionMap(hsaMappingTerms, eventTime).values());		
+        log.info("hsaId: " + hsaId + " commissions found {}", data.getCommissionList().size());
 
-        final Map<String, Commission> map = new HashMap<String, Commission>();
-
+        if (data.getCommissionList().size() == 0) {
+            throw new NotFoundException(String.format("No valid commissions found for HsaId: %s and ServiceCode: %s at the given time: %tFT%<tRZ",
+            		hsaId, serviceCode, eventTime));
+        }
+        
+        dataList.add(sortByTime(data));
+        return dataList;
+    }
+    
+    private List<ListPaymentResponsibleDataResponse> processBatchRequest(List<String> hsaIdList, Date eventTime, String serviceCode) {
+    	List<ListPaymentResponsibleDataResponse> dataList = new ArrayList<ListPaymentResponsibleDataResponse>();
+    	
+    	for (String hsaId : hsaIdList) {
+	        final ListPaymentResponsibleDataResponse data = new ListPaymentResponsibleDataResponse();
+	        data.setHsaId(hsaId);
+	        data.setServiceCode(serviceCode);
+			
+	        final Map<String, List<TermItem<HSAMappingState>>> index = getHSAMappingService().getCurrentIndex();
+	        final List<TermItem<HSAMappingState>> hsaMappingTerms = index.get(hsaId);
+	
+	        if (hsaMappingTerms != null) {
+	        	data.getCommissionList().addAll(getCommissionMap(hsaMappingTerms, eventTime).values());		
+	        	log.info("hsaId: " + hsaId + " commissions found {}", data.getCommissionList().size());
+	
+	        	if (data.getCommissionList().isEmpty()) {
+	        		log.info(String.format("No valid commissions found for HsaId: %s and ServiceCode: %s at the given time: %tFT%<tRZ",
+		            		hsaId, serviceCode, eventTime));
+	        	}
+	    	} else {
+	    		log.info(String.format("No mapping to kombika found for HsaId: %s", hsaId));
+	    	}
+	        dataList.add(sortByTime(data));
+    	}
+    	
+    	return dataList;
+    }
+    
+    private List<TermItem<HSAMappingState>> getHsaMappingTerms(String hsaId) {
+    	Map<String, List<TermItem<HSAMappingState>>> index = getHSAMappingService().getCurrentIndex();
+        List<TermItem<HSAMappingState>> hsaMappingTerms = index.get(hsaId);
+        return hsaMappingTerms;
+    }
+    
+    private Map<String, Commission> getCommissionMap(List<TermItem<HSAMappingState>> hsaMappingTerms, Date eventTime) {
+    	final Map<String, Commission> commissionMap = new HashMap<String, Commission>();
+		
         for (final TermItem<HSAMappingState> hsaMappingTerm : hsaMappingTerms) {
             final HSAMappingState mappingState = hsaMappingTerm.getState(eventTime);
             if (mappingState != null) {
                 final FacilityState facilityState = mappingState.getFacility().getState(eventTime);
                 if (facilityState != null) {
                     log.debug("process facility: {}", facilityState.getName());
-                    processFacility(facilityState, mappingState.getFacility().getId(), eventTime, map);
+                    processFacility(facilityState, mappingState.getFacility().getId(), eventTime, commissionMap);
                 }
             }
         }
-
-        data.getCommissionList().addAll(map.values());
-
-        log.info("commissions found {}", data.getCommissionList().size());
-
-        if (data.getCommissionList().size() == 0) {
-            throw new NotFoundException(String.format("No valid commissions found for HsaId: %s and ServiceCode: %s at the given time: %tFT%<tRZ",
-                    request.getHsaId(),
-                    request.getServiceCode(),
-                    eventTime));
-        }
         
-        // sort stuff in time order
-        Collections.sort(data.getCommissionList(), new Comparator<Commission>() {
-            @Override
-            public int compare(Commission left, Commission right) {
-                return left.getValidFrom().compare(right.getValidFrom());
-            }
-        });
-
-        return data;
+        return commissionMap;
     }
-
+    
+    private ListPaymentResponsibleDataResponse sortByTime(ListPaymentResponsibleDataResponse data) {
+    	 Collections.sort(data.getCommissionList(), new Comparator<Commission>() {
+	            @Override
+	            public int compare(Commission left, Commission right) {
+	                return left.getValidFrom().compare(right.getValidFrom());
+	            }
+	        });
+    	 
+    	 return data;
+    }
+    
     //
     protected static boolean contains(String[] list, String id) {
         for (final String e : list) {
