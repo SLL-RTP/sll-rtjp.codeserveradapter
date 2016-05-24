@@ -16,6 +16,7 @@
 package se.sll.codeserveradapter.parser;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -72,7 +73,7 @@ public abstract class TermState implements Comparable<TermState>, Serializable {
     }
 
     public void setValidFrom(Date validFrom) {
-        this.validFrom = (validFrom == null) ? MIN_DATE :validFrom;
+        this.validFrom = removeTime((validFrom == null) ? MIN_DATE :validFrom);
     }
 
     public Date getValidTo() {
@@ -80,11 +81,29 @@ public abstract class TermState implements Comparable<TermState>, Serializable {
     }
 
     public void setValidTo(Date validTo) {
-        this.validTo = (validTo == null) ? MAX_DATE : validTo;
+        this.validTo = removeTime((validTo == null) ? MAX_DATE : validTo);
+    }
+    
+    public static Date removeTime(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
     }
     
     public boolean isValid(Date date) {
-        return getValidFrom().before(date) && getValidTo().after(date);
+        return beforeOrEquals(date) && afterOrEquals(date);
+    }
+    
+    private boolean beforeOrEquals(Date date) {
+    	return getValidFrom().getTime() <= date.getTime();
+    }
+    
+    private boolean afterOrEquals(Date date) {
+    	return getValidTo().getTime() >= date.getTime();
     }
     
     public boolean isNewerThan(TermState anotherItem) {
