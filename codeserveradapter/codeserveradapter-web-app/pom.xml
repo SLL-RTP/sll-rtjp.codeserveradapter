@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>se.sll.codeserveradapter</groupId>
 		<artifactId>codeserveradapter-parent</artifactId>
-		<version>1.2.2-SNAPSHOT</version>
+		<version>1.2.2</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
