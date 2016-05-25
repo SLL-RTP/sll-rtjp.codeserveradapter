@@ -57,14 +57,15 @@ public class TermItem<T extends TermState> implements Serializable {
     }
     
     /**
-     * Returns state valid for a specific date and time.
+     * Returns state valid for a specific date and skips time.
      * 
-     * @param date the date and time.
+     * @param date the date.
      * @return the state or null if none found.
      */
     public T getState(final Date date) {
+    	Date dateWithoutTime = TermState.removeTime(date);
         for (final T state : stateVector) {
-            if (state.isValid(date)) {
+            if (state.isValid(dateWithoutTime)) {
                 return state;
             }
         }
