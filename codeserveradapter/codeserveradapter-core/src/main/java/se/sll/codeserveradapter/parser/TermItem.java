@@ -63,9 +63,8 @@ public class TermItem<T extends TermState> implements Serializable {
      * @return the state or null if none found.
      */
     public T getState(final Date date) {
-    	Date dateWithoutTime = TermState.removeTime(date);
         for (final T state : stateVector) {
-            if (state.isValid(dateWithoutTime)) {
+            if (state.isValid(date)) {
                 return state;
             }
         }
