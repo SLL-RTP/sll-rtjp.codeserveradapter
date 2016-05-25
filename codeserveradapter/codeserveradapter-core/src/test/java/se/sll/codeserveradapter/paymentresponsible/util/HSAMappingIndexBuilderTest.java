@@ -18,6 +18,8 @@ package se.sll.codeserveradapter.paymentresponsible.util;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import se.sll.codeserveradapter.TestSupport;
 import se.sll.codeserveradapter.parser.TermItem;
+import se.sll.codeserveradapter.paymentresponsible.model.CommissionState;
 import se.sll.codeserveradapter.paymentresponsible.model.HSAMappingState;
 import se.sll.codeserveradapter.paymentresponsible.service.HSAMappingService;
 
@@ -47,5 +50,26 @@ public class HSAMappingIndexBuilderTest extends TestSupport {
                 assertTrue(mapping.getStateVector().size() > 0);
             }
         }
+    }
+    
+    @Test
+    public void removeTime_success() {
+    	final CommissionState state = new CommissionState();
+    	state.setValidFrom(getDate(2005, 01, 01, 0, 0 , 1));
+    	state.setValidTo(getDate(2012, 12, 31, 23, 59, 59));
+    	assertTrue(state.isValid(getDate(2005, 01, 01, 0, 0, 0)));
+    	
+    	//Should work for same day same time
+    	assertTrue(state.isValid(getDate(2012, 12, 31, 23, 59, 59)));
+    	
+    	state.setValidFrom(getDate(2005, 01, 01, 0, 0 , 0));
+    	state.setValidTo(getDate(2012, 12, 31, 23, 59, 59));
+    	assertTrue(state.isValid(getDate(2005, 01, 01, 0, 0, 0)));
+    }
+    
+    private Date getDate(int year, int month, int date, int hour, int minutes, int sec) {
+    	Calendar cal = Calendar.getInstance();
+    	cal.set(year, month-1, date, hour, minutes, sec);
+    	return cal.getTime();
     }
 }

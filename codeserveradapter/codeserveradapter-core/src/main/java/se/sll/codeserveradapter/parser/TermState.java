@@ -16,12 +16,13 @@
 package se.sll.codeserveradapter.parser;
 
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.Date;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+
+import org.apache.commons.lang.time.DateUtils;
 
 /**
  * State valid for a particular period of time.
@@ -31,7 +32,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public abstract class TermState implements Comparable<TermState>, Serializable {
     private static final long serialVersionUID = 1L;
-
+    
     static Date MAX_DATE = new Date(Long.MAX_VALUE);
     static Date MIN_DATE = new Date(0L);
 
@@ -73,7 +74,7 @@ public abstract class TermState implements Comparable<TermState>, Serializable {
     }
 
     public void setValidFrom(Date validFrom) {
-        this.validFrom = removeTime((validFrom == null) ? MIN_DATE :validFrom);
+        this.validFrom = (validFrom == null) ? MIN_DATE : validFrom;
     }
 
     public Date getValidTo() {
@@ -81,17 +82,7 @@ public abstract class TermState implements Comparable<TermState>, Serializable {
     }
 
     public void setValidTo(Date validTo) {
-        this.validTo = removeTime((validTo == null) ? MAX_DATE : validTo);
-    }
-    
-    public static Date removeTime(Date date) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        return cal.getTime();
+        this.validTo = (validTo == null) ? MAX_DATE : validTo;
     }
     
     public boolean isValid(Date date) {
@@ -99,11 +90,11 @@ public abstract class TermState implements Comparable<TermState>, Serializable {
     }
     
     private boolean beforeOrEquals(Date date) {
-    	return getValidFrom().getTime() <= date.getTime();
+    	return getValidFrom().before(date) || DateUtils.isSameDay(getValidFrom(), date);
     }
     
     private boolean afterOrEquals(Date date) {
-    	return getValidTo().getTime() >= date.getTime();
+    	return getValidTo().after(date) || DateUtils.isSameDay(getValidTo(), date);
     }
     
     public boolean isNewerThan(TermState anotherItem) {
